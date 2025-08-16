@@ -1,0 +1,1 @@
+move_and_collide(velh * RELATIVE_DT, velv * RELATIVE_DT, obj_colisao)

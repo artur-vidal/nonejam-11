@@ -1,0 +1,10 @@
+LIBS
+
+Scribble por JujuAdams
+https://github.com/JujuAdams/Scribble
+
+TurboGML por Foxy Of Jungle
+https://github.com/FoxyOfJungle/TurboGML
+
+ÁUDIO
+
