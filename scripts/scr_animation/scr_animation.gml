@@ -23,6 +23,7 @@ function Animation(_target, _property, _from, _to, _duration) constructor{
     easing = ease_linear
     on_complete = undefined
     on_restart = undefined
+    args = []
     anim_type = AnimationTypes.SINGLE
     anim_tag = ""
     
@@ -51,6 +52,12 @@ function Animation(_target, _property, _from, _to, _duration) constructor{
     
     complete_callback = function(_val){
         on_complete = _val
+        return self
+    }
+    
+    callback_args = function(_val_array){
+        if(!is_array(_val_array)) _val_array = [_val_array]
+        args = _val_array
         return self
     }
     
@@ -91,7 +98,7 @@ function Animation(_target, _property, _from, _to, _duration) constructor{
     reset = function(_callback = true){
         time = 0
         if(anim_delay_in_between) anim_delay = initial_delay 
-        if(_callback and is_callable(on_restart)) on_restart()
+        if(_callback and is_callable(on_restart)) script_execute_ext(on_restart, args)
     }
     
     // função principal de atualização
@@ -129,7 +136,7 @@ function Animation(_target, _property, _from, _to, _duration) constructor{
                 if(bounce_step < 2) bounce_step++
                 else{
                     bounce_step = 0
-                    if(is_callable(on_restart)) on_restart()
+                    if(is_callable(on_restart)) script_execute_ext(on_restart, args)
                 }
                 break
             
@@ -153,7 +160,7 @@ function Animation(_target, _property, _from, _to, _duration) constructor{
                     if(bounce_step < 2) bounce_step++
                     else{
                         bounce_step = 0
-                        if(is_callable(on_restart)) on_restart()
+                        if(is_callable(on_restart)) script_execute_ext(on_restart, args)
                         repeat_times--
                     }
                     
@@ -199,7 +206,9 @@ function AnimationRunner() constructor{
             
             // colocando apenas animações ainda restantes no array
             if(_cur_elm.done){
-                if(is_callable(_cur_elm.on_complete)) _cur_elm.on_complete()
+                if(is_callable(_cur_elm.on_complete)) {
+                    script_execute_ext(_cur_elm.on_complete, _cur_elm.args)
+                }
                 array_delete(elements, i, 1)
             }
         }

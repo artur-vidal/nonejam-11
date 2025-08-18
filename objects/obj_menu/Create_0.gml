@@ -62,7 +62,7 @@ open = function(_group){
     //initialize(MenuOptionSelectionEffects.SCALE, 1, 1.25, .5, ease_out_circ)
     
     current_group = main_group
-    show_debug_message(json_stringify(current_group, true))
+    // show_debug_message(json_stringify(current_group, true))
     
     current_group.elements[pos].enter_selection()
 }

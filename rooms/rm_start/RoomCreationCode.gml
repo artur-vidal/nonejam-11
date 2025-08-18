@@ -1,7 +1,5 @@
 create_menu(new MenuGroup([
-    new MenuOption("Caralho"),
-    new MenuOption("Cacete"),
-    new MenuOption("Caramba"),
+    new MenuOption("Batalha", room_goto, rm_battle),
     
     new MenuOption("Volume", "chmenu", 1),
 

@@ -26,6 +26,7 @@ function MenuGroup(_elements, _label = "") constructor{
     child_num = -1
     
     option_offset = {x : 0, y : 0}
+    effect_tag = $"menu_group_id:{group_id}_effect"
     
     parent_count = function(){
         if(parent_group = -1) return 0
@@ -256,9 +257,11 @@ function MenuOption(_label, _action = -1, _args = -1) constructor{
             pos = 0
             
             if(draw_past_groups and _forward){
+                root.anim.cancel(_submenu_struct.effect_tag)
                 root.anim.add(
                     new Animation(_submenu_struct.option_offset, "x", -600 - 400 * other.parent_group.parent_count(), 0, 1)
                         .ease(ease_out_quint)
+                        .tag(_submenu_struct.effect_tag)
                 )
             }
             
