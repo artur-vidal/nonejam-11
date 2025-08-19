@@ -1,11 +1,15 @@
+
+
+vol_option = new MenuSelection("Volume", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+vol_option.set_index(array_length(vol_option.options) - 1)
+
+vol_option.on_change = function(){
+    audio_master_gain(vol_option.options[vol_option.index] / 20)
+}
+audio_master_gain(.5)
+
 create_menu(new MenuGroup([
     new MenuOption("Batalha", room_goto, rm_battle),
-    
-    new MenuOption("Volume", "chmenu", 1),
-
-    new MenuGroup([
-        new MenuSelection("Volume", ["oi"]),
-        new MenuOption("Voltar", "bkmenu")
-    ], "Opções de Volume")
-
+    new MenuOption("Game", room_goto, rm_game),
+    vol_option
 ], "Menu Principal"))

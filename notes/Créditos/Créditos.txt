@@ -1,10 +1,11 @@
-LIBS
+### LIBS
 
-Scribble por JujuAdams
-https://github.com/JujuAdams/Scribble
+- Scribble por JujuAdams  
+(https://github.com/JujuAdams/Scribble)
 
-TurboGML por Foxy Of Jungle
-https://github.com/FoxyOfJungle/TurboGML
+- TurboGML por Foxy Of Jungle 
+(https://github.com/FoxyOfJungle/TurboGML)
 
-ÁUDIO
-
+### FONTES (texto)
+- Early Gameboy por Jimmy Campbell
+(https://www.dafont.com/pt/early-gameboy.font)

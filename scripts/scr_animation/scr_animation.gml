@@ -4,7 +4,6 @@ enum AnimationTypes{
     PATROL,
     LOOP,
     REPEAT,
-    BOUNCE_MANY,
     REPEAT_MANY
 }
 

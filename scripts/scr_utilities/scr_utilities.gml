@@ -56,6 +56,49 @@ function Counter(_array_or_ds_list) constructor{
     }
 }
 
+function Sprite(_asset) constructor{
+    sprite = _asset
+    index = 0
+    image_spd = 1
+    
+    xscale = 1
+    yscale = 1
+    color = c_white
+    rotation = 0
+    alpha = 1
+    
+    change = function(_new_asset){
+        sprite = _new_asset
+        image_ind = 0
+    }
+    
+    animate = function(_fps){
+        
+    	// Pegando quantos frames minha sprite atual tem
+    	var _image_num = sprite_get_number(sprite)
+    	
+    	//Aumentando o valor do index com base na velocidade
+        var _add = fps * image_spd * RELATIVE_DT
+    	image_ind += _add
+    	
+        // Rodando script de fim de animação quando ela acabar
+        if(image_ind + _add > _image_num) {
+            image_ind = 0
+            on_animation_end()
+        }
+    }
+    
+    on_animation_end = function() {
+        
+    }
+    
+    draw = function(x, y){
+        if(sprite != noone){
+            draw_sprite_ext(sprite, index, x, y, xscale, yscale, rotation, color, alpha)
+        }
+    }
+}
+
 //// FUNÇÕES ////
 
 ///@desc Retorna se o jogo está ou não pausado. Estar com velocidade 0 já conta
@@ -79,6 +122,15 @@ function wave(_min, _max, _duration, _offset = 0){
     var angle = ((root.relative_current_time * 0.001) / _duration) * (pi * 2);
     angle += _offset * (pi * 2); // deslocamento de fase
     return _min + a4 + sin(angle) * a4;
+}
+
+function game_start(_vol, _rm){
+    audio_master_gain(_vol)
+    room_goto(_rm)
+}
+
+function create_indicator(_x, _y, _val){
+    instance_create_depth(_x, _y, -1000, obj_damage_indicator).val = _val
 }
 
 ///@description Pausa ou despausa o jogo dependendo do estado atual.

@@ -302,6 +302,16 @@ function MenuSelection(_label, _option_array, _wrap = false) : MenuOption("", -1
     icon.sprite = spr_menu_option_select_arrow
     icon.effect = MenuOptionIconEffects.UP_DOWN
     
+    set_index = function(_ind){
+        index = _ind
+        value = options[_ind]
+        icon_label = string(options[_ind])
+    }
+    
+    on_change = function() {
+        
+    }
+    
     update = function(){
         var _change = keyboard_check_pressed(vk_right) - keyboard_check_pressed(vk_left)
         var _is_on_me = parent_menu.current_group.elements[parent_menu.pos] == self
@@ -319,11 +329,15 @@ function MenuSelection(_label, _option_array, _wrap = false) : MenuOption("", -1
             icon_label = options[index]
             _changed = index != _changed
             
-            if(_change != 0 and _changed){
+            if(_change != 0){
+                on_change()
+                
                 audio_stop_sound(snd_menu_switch)
                 audio_play_sound(snd_menu_switch, 1, 0, 1, undefined, .7) 
             }
         }
+        
+        value = options[index]
     }
     
     draw = function(_x, _y, _color, _scribble_effects = ""){

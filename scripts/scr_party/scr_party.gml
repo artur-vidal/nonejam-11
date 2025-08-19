@@ -1,0 +1,4 @@
+enum PlayerStates {
+    IDLE,
+    WALKING
+}
