@@ -1,12 +1,11 @@
 units = [
-    new Guerreiro(80, 10, 5, new Sprite(spr_guerreiro_idle)),
-    new Mago(80, 5, 10, new Sprite(spr_mago_idle)),
+    new Guerreiro(130, 10, 0),
+    new Mago(80, 0, 10),
 ]
 
 enemies = [
-    new BattleEnemy("Inimigo 1", new Sprite(spr_quad_2)),
-    new BattleEnemy("Inimigo 2", new Sprite(spr_quad_2)),
-    new BattleEnemy("Inimigo 3", new Sprite(spr_quad_2))
+    new Dino(),
+    new BattleEnemy("Inimigo 2", new Sprite(spr_quad_2))
 ]
 
 ylayouts = [
@@ -44,6 +43,23 @@ draw_all = function(){
         enemies[i].main_draw()
         enemies[i].draw()
     }
+}
+
+// redefinindo alvos
+redefine_targets = function(){
+	for(var i = 0; i < array_length(units); i++){
+		var _unit = units[i]
+		
+		/* se o alvo é uma unit ou ainda existe, 
+		eu não preciso redefinir então passo pra próxima */
+		if(is_instanceof(_unit.target, BattleUnit) or array_contains(enemies, _unit.target)){
+			continue	
+		}
+		
+		if(array_length(enemies) > 0){
+			_unit.target = enemies[0]
+		}
+	}
 }
 
 // inicializando tudo
@@ -222,7 +238,13 @@ state_player_actions = function(){
             current_unit = 0
             action_selection = 0
             selecting = BattleSelectionModes.ACTIONS
-            state = BattleStates.ENEMY_ATTACKING
+			
+			if(array_length(enemies) > 0){
+				state = BattleStates.ENEMY_ATTACKING
+			} else {
+				state = BattleStates.END	
+			}
+            
         }
     }
 }

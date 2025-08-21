@@ -2,7 +2,9 @@ enum BattleStates {
     STARTING,
     PLAYER_TURN,
     PLAYER_ACT,
-    ENEMY_ATTACKING
+    ENEMY_ATTACKING,
+	DIALOGUE,
+	END
 }
 
 enum BattleActions {
@@ -302,7 +304,10 @@ function BattleEnemy(_name, _sprite) : BattleEntity("", noone) constructor {
     die = function() {
         with(battle) {
             for(var i = 0; i < array_length(enemies); i++){
-                if(enemies[i] == other) array_delete(enemies, i, 1)
+                if(enemies[i] == other){
+					array_delete(enemies, i, 1)
+					redefine_targets()
+				}
             }
         }
     }
@@ -373,15 +378,15 @@ function BattleEnemy(_name, _sprite) : BattleEntity("", noone) constructor {
 
 
 
-function Guerreiro(_vida, _atk, _mag, _spr) : BattleUnit("", noone) constructor {
+function Guerreiro(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
     hp = _vida
-    max_hp = 60
+    max_hp = 130
     attack_damage = _atk
     
     attack_damage = _atk
     magic_damage = _mag
     
-    sprite = _spr
+    sprite = new Sprite(spr_guerreiro_idle)
     
     available_actions = [
         BattleActions.ATTACK,
@@ -466,6 +471,7 @@ function Guerreiro(_vida, _atk, _mag, _spr) : BattleUnit("", noone) constructor 
                             self.concentrating = false
                             call_later(1, time_source_units_seconds, function(){
                                 self.sprite.change(spr_guerreiro_move)
+								self.draw_y -= 14
                                 self.sprite.xscale = -1
                                 self.action_state = BattleActionStates.ATTACK_LEAVING
                             })
@@ -521,14 +527,14 @@ function Guerreiro(_vida, _atk, _mag, _spr) : BattleUnit("", noone) constructor 
     }
 }
 
-function Mago(_vida, _atk, _mag, _spr) : BattleUnit("", noone) constructor {
+function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
     hp = _vida
-    max_hp = 60
+    max_hp = 80
     
     attack_damage = _atk
     magic_damage = _mag
     
-    sprite = _spr
+    sprite = new Sprite(spr_mago_idle)
     
     charge_max = 180
     magic_start_seconds = 2
@@ -649,8 +655,87 @@ function Mago(_vida, _atk, _mag, _spr) : BattleUnit("", noone) constructor {
     }
 }
 
-
-
-
-
-
+function Dino() : BattleEnemy(250, noone) constructor {
+	name = "Dino"
+	sprite = new Sprite(spr_dino_idle)
+	
+	attack_anim_seconds = 1.5
+	
+	attack_state = function() {
+        if(action_state == -1) action_state = BattleActionStates.ATTACK_WALKING
+        if(target == -1) target = battle.units[irandom(array_length(battle.units) - 1)]
+        
+        var _targetx, _targety, _dir, _dist
+        
+        switch (action_state) {
+            case BattleActionStates.ATTACK_WALKING:
+                var _arrived = go_to_point(target.x + 32, target.y, 3)
+                if(_arrived) {
+                    action_state = BattleActionStates.ATTACK_CHARGING
+                    
+                    // adicionando animação de ataque
+					var _tag = $"enemy:{entity_id}_attack_anim"
+                    var _duration = attack_anim_seconds
+                    var _back_distance = 16 
+                    
+                    root.anim.add(
+                        new Animation(self.sprite, "yscale", 1, .8, _duration * (2 / 3))
+							.ease(ease_out_sine)
+                            .tag(_tag)
+                    )
+					
+					root.anim.add(
+                        new Animation(self.sprite, "yscale", .8, 1, _duration * (1 / 3))
+							.delay(_duration * (2 / 3))
+							.ease(ease_out_sine)
+                            .tag(_tag)
+                    )
+					
+                    root.anim.add(
+                        new Animation(self, "draw_x", draw_x, draw_x + _back_distance, _duration * (2 / 3))
+							.ease(ease_out_sine)
+                            .tag(_tag)
+                    )
+                    
+                    root.anim.add(
+                        new Animation(self, "draw_x", draw_x + _back_distance, draw_x - 20, _duration * (1 / 3))
+							.delay(_duration * (2 / 3))
+                            .ease(ease_out_quart)
+                            .tag(_tag)
+                    )
+                    
+                }
+                break
+            
+            case BattleActionStates.ATTACK_CHARGING:
+                if(!attacked){
+                    attacked = true
+                    target.dodging = true
+                    call_later(attack_anim_seconds - .3, time_source_units_seconds, 
+                    function(){
+                        if(!target.jumping){
+                            var _parry = self.target.time_with_shield = clamp(self.target.time_with_shield, 1, 10)
+                            var _damage = (_parry) ? 0 : self.attack_damage * 4 // diminuindo dano se o parry der certo
+                            self.target.take_dmg(_damage)
+                            self.target.sprite.color = c_red
+                        }
+                        self.target.dodging = false
+                        self.target.jumping = false
+                        self.action_state = BattleActionStates.ATTACK_LEAVING
+                    })
+                }
+                break
+            
+            case BattleActionStates.ATTACK_LEAVING:
+                var _arrived = go_to_point(x, y, 2)
+                if(_arrived){
+                    target = -1
+                    action_state = -1
+                    
+                    attacked = false
+                    finished_action = true
+                }
+                break
+        }
+    }
+}

@@ -1,1 +1,5 @@
-texto = ["Oioioioioioioioioi"]
+texto = []
+
+action = function() {
+	
+}

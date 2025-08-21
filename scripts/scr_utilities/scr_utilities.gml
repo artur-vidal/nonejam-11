@@ -73,8 +73,10 @@ function Sprite(_asset) constructor{
     }
     
     change = function(_new_asset){
-        sprite = _new_asset
-        image_ind = 0
+		if(sprite != _new_asset){
+	        sprite = _new_asset
+	        image_ind = 0
+		}
     }
     
     animate = function(_fps){
@@ -83,7 +85,7 @@ function Sprite(_asset) constructor{
     	var _image_num = sprite_get_number(sprite)
     	
     	//Aumentando o valor do index com base na velocidade
-        var _add = image_spd * RELATIVE_DT
+        var _add = _fps * image_spd * RELATIVE_DT
     	image_ind += _add
     	
         // Rodando script de fim de animação quando ela acabar
@@ -139,6 +141,10 @@ function create_indicator(_x, _y, _val){
 }
 
 function create_dialogue(_text_array, _sound = snd_text_mid, _pitch_min = 1, _pitch_max = 1, _font = fnt_default){
+	if(root.dialogue_create_cooldown > 0 or instance_exists(obj_ow_dialogue)){
+		return
+	}
+	
     var _box = instance_create_depth(0, 0, -100, obj_ow_dialogue)
     _box.text = _text_array
     _box.font = _font

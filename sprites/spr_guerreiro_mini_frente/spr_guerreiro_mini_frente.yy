@@ -12,10 +12,10 @@
   "edgeFiltering":false,
   "For3D":false,
   "frames":[
-    {"$GMSpriteFrame":"","%Name":"8397a671-7356-4df4-9a4c-b545ef5d01fa","name":"8397a671-7356-4df4-9a4c-b545ef5d01fa","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
     {"$GMSpriteFrame":"","%Name":"46fbc795-fa9b-47b4-a596-378e819e1921","name":"46fbc795-fa9b-47b4-a596-378e819e1921","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
     {"$GMSpriteFrame":"","%Name":"45cfe3ce-5fcd-4644-a08c-7c4200493600","name":"45cfe3ce-5fcd-4644-a08c-7c4200493600","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
     {"$GMSpriteFrame":"","%Name":"227a1ca4-1b4c-4d03-a0f8-9aa28750792c","name":"227a1ca4-1b4c-4d03-a0f8-9aa28750792c","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"","%Name":"8397a671-7356-4df4-9a4c-b545ef5d01fa","name":"8397a671-7356-4df4-9a4c-b545ef5d01fa","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
   ],
   "gridX":0,
   "gridY":0,
@@ -26,10 +26,10 @@
   ],
   "name":"spr_guerreiro_mini_frente",
   "nineSlice":null,
-  "origin":0,
+  "origin":7,
   "parent":{
-    "name":"Sprites",
-    "path":"folders/Sprites.yy",
+    "name":"Overworld",
+    "path":"folders/Sprites/Guerreiro/Overworld.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",
@@ -74,23 +74,23 @@
     "tracks":[
       {"$GMSpriteFramesTrack":"","builtinName":0,"events":[],"inheritsTrackColour":true,"interpolation":1,"isCreationTrack":false,"keyframes":{"$KeyframeStore<SpriteFrameKeyframe>":"","Keyframes":[
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"8397a671-7356-4df4-9a4c-b545ef5d01fa","path":"sprites/spr_guerreiro_mini_frente/spr_guerreiro_mini_frente.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"9f8d51b0-6385-4e7d-af6c-e88747bf93a0","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
-            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"46fbc795-fa9b-47b4-a596-378e819e1921","path":"sprites/spr_guerreiro_mini_frente/spr_guerreiro_mini_frente.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"b86532b5-a5fe-4551-94e2-aaf36442b676","IsCreationKey":false,"Key":1.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"b86532b5-a5fe-4551-94e2-aaf36442b676","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"45cfe3ce-5fcd-4644-a08c-7c4200493600","path":"sprites/spr_guerreiro_mini_frente/spr_guerreiro_mini_frente.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"a5fb1867-bd0e-4eb0-8724-5f283b430e0d","IsCreationKey":false,"Key":2.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"a5fb1867-bd0e-4eb0-8724-5f283b430e0d","IsCreationKey":false,"Key":1.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
                 "0":{"$SpriteFrameKeyframe":"","Id":{"name":"227a1ca4-1b4c-4d03-a0f8-9aa28750792c","path":"sprites/spr_guerreiro_mini_frente/spr_guerreiro_mini_frente.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"1bb0a2e5-702c-4aa5-86df-0f4dd53f2d9d","IsCreationKey":false,"Key":3.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+              },"Disabled":false,"id":"1bb0a2e5-702c-4aa5-86df-0f4dd53f2d9d","IsCreationKey":false,"Key":2.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+            {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"8397a671-7356-4df4-9a4c-b545ef5d01fa","path":"sprites/spr_guerreiro_mini_frente/spr_guerreiro_mini_frente.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"9f8d51b0-6385-4e7d-af6c-e88747bf93a0","IsCreationKey":false,"Key":3.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],
     "visibleRange":null,
     "volume":1.0,
-    "xorigin":0,
-    "yorigin":0,
+    "xorigin":6,
+    "yorigin":12,
   },
   "swatchColours":null,
   "swfPrecision":0.5,

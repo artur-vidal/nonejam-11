@@ -1,1 +1,1 @@
-draw_self()
+sprite.draw(x, y)
