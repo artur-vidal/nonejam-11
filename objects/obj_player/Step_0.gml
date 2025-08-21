@@ -12,5 +12,9 @@ if((x - 6) % tile_size == 0 and y % tile_size == 0){
     }
 }
 
-x += velh
-y += velv
+if(keyboard_check_pressed(ord("Z")) and control) {
+    var _interagivel = collision_rectangle(x + 7, y + 1, x - 7, y - 13, obj_interagivel, false, true)
+    if(_interagivel) {
+        create_dialogue(_interagivel.texto)
+    }
+}

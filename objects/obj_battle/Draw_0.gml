@@ -1,40 +1,28 @@
 draw_all()
 
-if(state == BattleStates.PLAYER_TURN){
+if(state == BattleStates.PLAYER_TURN and array_length(available_actions) > 0){
     
     // desenhando menu de opções em cima da unit
     if(selecting == BattleSelectionModes.ACTIONS){
-        var _x = units[current_unit].x + units[current_unit].offset.x
-        var _y = units[current_unit].y + units[current_unit].offset.y - 20
+        var _x = units[current_unit].draw_x
+        var _y = units[current_unit].draw_y - 20 - wave(0, 3, 3)
         
-        var _spacing = 20
-        
-        var _prev_index = (action_selection - 1 + BattleActions.COUNT) % BattleActions.COUNT
-        var _next_index = (action_selection + 1) % BattleActions.COUNT
-        
-        var _left_text = scribble(action_labels[_prev_index])
+        var _text = scribble(action_labels[available_actions[action_selection]])
                 .starting_format("fnt_default", #081820)
                 .align(1, 1)
-                .blend(c_white, .4)
                 .scale(.25)
                 
-        _left_text.draw(_x - _spacing, _y - 4)
+        _text.draw(_x, _y - 4)
         
-        var _mid_text = scribble(action_labels[action_selection])
-                .starting_format("fnt_default", #081820)
-                .align(1, 1)
-                .blend(c_white, 1)
-                .scale(.25)
-                
-        _mid_text.draw(_x, _y)
+        var _arrow_spacing = 2
+        var _arrow_scale = .3
         
-        var _right_text = scribble(action_labels[_next_index])
-                .starting_format("fnt_default", #081820)
-                .align(1, 1)
-                .blend(c_white, .4)
-                .scale(.25)
-                
-        _right_text.draw(_x + _spacing, _y - 4)
+        // desenhando setinhas
+        draw_sprite_ext(spr_action_arrow, 0, _x + _text.get_width() / 2 + _arrow_spacing, _y - 4,
+        _arrow_scale, _arrow_scale, 0, c_white, 1)
+        
+        draw_sprite_ext(spr_action_arrow, 0, _x - _text.get_width() / 2 - _arrow_spacing, _y - 4,
+        -_arrow_scale, _arrow_scale, 0, c_white, 1)
     }
     
     // desenhando maozinha de seleção
@@ -55,7 +43,7 @@ if(state == BattleStates.PLAYER_TURN){
     }
     
     // opção selecionada
-    var _selected_action = scribble(action_labels[action_selection])
+    var _selected_action = scribble(action_labels[available_actions[action_selection]])
         .starting_format("fnt_default", #081820)
         .align(1, 1)
         .scale(.3)

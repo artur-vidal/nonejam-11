@@ -1,6 +1,6 @@
 units = [
-    new BattleUnit("Quadrado 1", new Sprite(spr_quad_1)),
-    new BattleUnit("Quadrado 2", new Sprite(spr_quad_1))
+    new Guerreiro(80, 10, 5, new Sprite(spr_guerreiro_idle)),
+    new Mago(80, 5, 10, new Sprite(spr_mago_idle)),
 ]
 
 enemies = [
@@ -65,8 +65,9 @@ apply_start_anim = function() {
         
         units[i].set_pos(_starting_unit_x, ylayouts[array_length(units) - 1, i])
         
+        var _prev_off = units[i].offset.x
         units[i].offset.x = _unit_xoffset
-        var _anim = new Animation(units[i].offset, "x", _unit_xoffset, 0, _duration)
+        var _anim = new Animation(units[i].offset, "x", _unit_xoffset, _prev_off, _duration)
                         .ease(ease_linear)
                         .delay(_base_delay + i * 0.5)
                         .tag($"battle_entity:{units[i].entity_id}_spawn_anim")
@@ -79,8 +80,9 @@ apply_start_anim = function() {
         
         enemies[i].set_pos(_starting_enemy_x, ylayouts[array_length(enemies) - 1, i])
         
+        var _prev_off = enemies[i].offset.x
         enemies[i].offset.x = _enemy_xoffset
-        var _anim = new Animation(enemies[i].offset, "x", _enemy_xoffset, 0, _duration)
+        var _anim = new Animation(enemies[i].offset, "x", _enemy_xoffset, _prev_off, _duration)
                         .ease(ease_linear)
                         .delay(_base_delay * 3 + i)  
                         .tag($"battle_entity_{enemies[i].entity_id}_spawn_anim")
@@ -101,7 +103,7 @@ selecting = BattleSelectionModes.ACTIONS
 selected_entity = 0
 
 action_selection = BattleActions.ATTACK
-action_selection_display = action_selection
+available_actions = []
 
 action_labels = []
 action_labels[BattleActions.ATTACK] = "Ataque"
@@ -110,14 +112,15 @@ action_labels[BattleActions.CHARGE] = "Concentrar"
 action_labels[BattleActions.HEAL] = "Curar"
 
 set_current_unit = function() {
-    current_unit = 0
-    while(units[current_unit].action != -1){
+    current_unit = -1
+    do {
         current_unit++
-    }
+        available_actions = units[current_unit].available_actions
+    } until(units[current_unit].action == -1)
 }
 
 select_action = function(_entity) {
-    units[current_unit].action = action_selection
+    units[current_unit].action = available_actions[action_selection]
     units[current_unit].target = _entity[selected_entity]
     
     units[current_unit].action_state = -1
@@ -147,6 +150,11 @@ back_action = function() {
     selecting = BattleSelectionModes.ACTIONS
 }
 
+wrap_action_selection = function() {
+    if(action_selection > array_length(available_actions) - 1) action_selection = 0
+    else if(action_selection < 0) action_selection = array_length(available_actions) - 1
+}
+
 state_player = function(){ 
     
     var _change = keyboard_check_pressed(vk_down) - keyboard_check_pressed(vk_up)
@@ -157,8 +165,7 @@ state_player = function(){
         // mudando opção
         _change = keyboard_check_pressed(vk_right) - keyboard_check_pressed(vk_left)
         action_selection += _change
-        if(action_selection > BattleActions.COUNT - 1) action_selection = 0
-        else if(action_selection < 0) action_selection = BattleActions.COUNT - 1
+        wrap_action_selection()
          
         // voltando pra unidade anterior e redefinindo a ação dela
         if(keyboard_check_pressed(vk_escape) and current_unit > 0){
@@ -169,7 +176,7 @@ state_player = function(){
         }
         
         if(keyboard_check_pressed(vk_space)) {
-            switch(action_selection) {
+            switch(available_actions[action_selection]) {
                 case BattleActions.ATTACK: selecting = BattleSelectionModes.ENEMIES; break;
                 case BattleActions.MAGIC: selecting = BattleSelectionModes.ENEMIES; break;
                 case BattleActions.CHARGE: select_action(units); break;
@@ -244,9 +251,9 @@ apply_start_anim()
 if(!audio_is_playing(msc_battle)){
     
     if(root.first_battle){
-        audio_play_sound(msc_battle, 1, 1)
+        audio_play_sound(msc_battle, 1, 1, .7)
     } else {
-        audio_play_sound(msc_battle, 1, 1, 1, 10.14)
+        audio_play_sound(msc_battle, 1, 1, .7, 10.14)
     }
 }
 root.first_battle = false
