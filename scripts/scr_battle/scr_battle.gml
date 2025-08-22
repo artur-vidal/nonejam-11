@@ -776,6 +776,73 @@ function Dino() : BattleEnemy(250, noone) constructor {
     }
 }
 
+function UnitCard(_unit_link) constructor {
+	static card_id = 0
+	card_id++
+	
+	link = _unit_link
+	anim_tag = $"unit_card:{card_id}_anim"
+	// top-left
+	x = 20 + (48 * card_id)
+	y = -100
+	
+	width = 32
+	height = 48
+	
+	raised = false
+	
+	root.anim.add(
+		new Animation(self, "y", 128, 128 - height / 3, 2)
+			.ease(ease_out_cubic)
+			.tag(anim_tag)
+	)
+	
+	raise = function(){
+		if(raised) {
+			return	
+		}
+		
+		root.anim.cancel(anim_tag)
+		root.anim.add(
+			new Animation(self, "y", y, y - 32, 1)
+				.ease(ease_out_cubic)
+				.tag(anim_tag)
+		)
+		raised = true
+	}
+	
+	lower = function(){
+		if(!raised) {
+			return	
+		}
+		
+		root.anim.cancel(anim_tag)
+		root.anim.add(
+			new Animation(self, "y", y, y + 32, 1)
+				.ease(ease_out_cubic)
+				.tag(anim_tag)
+		)
+		raised = false
+	}
+	
+	draw = function() {
+		var _background_color = #081820
+		var _text_color = #E0F8D0
+		
+		// desenhando fundo com cabecinha redonda :/
+		draw_set_color(_background_color)
+		
+		// a cabeça pega 1/3 da altura e o resto fica pro corpo
+		draw_rectangle(x, y, x + width, y + height, false)
+		
+		draw_set_color(c_white)
+		
+		// desenhando infos
+		var _life_text = scribble(link.hp)
+			.starting_format("fnt_default", _text_color)
+	}
+}
+
 function start_battle(_units, _enemies, _start_frames = 0, _song = msc_battle) {
 	// tirando controle do player e manipulando câmera
 	obj_player.control = false
@@ -784,9 +851,11 @@ function start_battle(_units, _enemies, _start_frames = 0, _song = msc_battle) {
 	audio_stop_all()
 	
     var _inst = instance_create_depth(0, 0, -100, obj_battle)
-    
+    var _cards = [] // preencher com os cartões
+	
     for(var i = 0; i < array_length(_units); i++){
         _units[i].battle = _inst
+		array_push(_cards, new UnitCard(_units[i]))
     }
     
     for(var i = 0; i < array_length(_enemies); i++){
@@ -795,6 +864,7 @@ function start_battle(_units, _enemies, _start_frames = 0, _song = msc_battle) {
     
     _inst.units = _units
     _inst.enemies = _enemies
+	_inst.cards = _cards
 	_inst.music = _song
 	_inst.delay_start = _start_frames
 }

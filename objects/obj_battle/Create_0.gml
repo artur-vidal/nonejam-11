@@ -1,12 +1,6 @@
-units = [
-    new Guerreiro(130, 10, 0),
-    new Mago(80, 0, 10),
-]
-
-enemies = [
-    new Dino(),
-    new BattleEnemy("Inimigo 2", new Sprite(spr_quad_2))
-]
+units = []
+enemies = []
+cards = []
 
 ylayouts = [
     [70], // uma unit
@@ -48,6 +42,10 @@ draw_all = function(){
     for(var i = 0; i < array_length(enemies); i++){
         enemies[i].main_draw()
         enemies[i].draw()
+    }
+	
+	for(var i = 0; i < array_length(cards); i++){
+        cards[i].draw()
     }
 }
 
@@ -117,6 +115,12 @@ apply_start_anim = function() {
         root.anim.add(_anim)
     }
     
+	// cards
+	//for(var i = 0; i < array_length(cards); i++){
+	//	cards[i].x = 20 + (i * 40)
+	//	cards[i].y = 128 - cards[i].height / 3
+	//}
+	
     root.first_battle = false
 }
 
@@ -142,6 +146,10 @@ set_current_unit = function() {
     current_unit = -1
     do {
         current_unit++
+		
+		if(current_unit - 1 > 0) cards[current_unit - 1].lower()
+		
+		cards[current_unit].raise()
         available_actions = units[current_unit].available_actions
     } until(units[current_unit].action == -1)
 }
@@ -156,6 +164,7 @@ select_action = function(_entity) {
     /* se o current_unit passar da quantidade de unidades (ou seja, acabou as ação)
     eu volto pra primeira unit e passo pro estado de ataque */
     if(current_unit == array_length(units) - 1){
+		cards[array_length(units) - 1].lower()
         current_unit = 0
         selected_entity = 0
         state = BattleStates.PLAYER_ACT
