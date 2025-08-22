@@ -195,7 +195,7 @@ state_player = function(){
         wrap_action_selection()
          
         // voltando pra unidade anterior e redefinindo a ação dela
-        if(keyboard_check_pressed(vk_escape) and current_unit > 0){
+        if(keyboard_check_pressed(ord("X")) and current_unit > 0){
             units[current_unit - 1].action = -1
             units[current_unit - 1].target = -1
             current_enemy = 0

@@ -803,5 +803,5 @@ function end_battle() {
 	instance_destroy(obj_battle)
 	obj_camera.control_mode = "dungeon"
 	obj_camera.spawning = true
-	obj_player.control = false
+	obj_player.control = true
 }
