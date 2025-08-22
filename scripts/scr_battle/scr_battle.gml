@@ -33,12 +33,14 @@ enum BattleSelectionModes {
     ENEMIES,
 }
 
+
+// CONSTRUTORES PRIMARIOS
 function BattleEntity(_name, _sprite) constructor{
     static entity_id = 0
     entity_id++
     
     name = _name
-    battle = other.id
+    battle = noone
     
     max_hp = 100
     hp = max_hp
@@ -81,17 +83,19 @@ function BattleEntity(_name, _sprite) constructor{
     time_with_shield = 0
     
     take_dmg = function(_dmg, _crit = false) {
-        hp -= _dmg * reduction
-        
-        if(time_with_shield == clamp(time_with_shield, 1, 10)){
-            audio_play_sound(snd_parry, 1, 0)
-            sprite.color = #E0F8D0
-        }else{
+        if(time_with_shield == clamp(time_with_shield, 1, 7)){
+            audio_play_sound(snd_parry, 1, 0, 1.3)
+            reduction = 0
+            // sprite.color = #88c070
+            battle.draw_black_overlay = 8
+        } else {
             audio_play_sound((_crit) ? snd_crit : snd_hurt, 1, 0)
             sprite.color = c_red
         }
         
-        create_indicator(x + offset.x, y + offset.y - 12, -_dmg * reduction)
+        var _final_dmg = _dmg * reduction
+        hp -= _final_dmg
+        create_indicator(x + offset.x, y + offset.y - 12, -_final_dmg)
         
         if(hp < 0){
             dead = true
@@ -145,9 +149,9 @@ function BattleEntity(_name, _sprite) constructor{
         var _g = color_get_green(sprite.color)
         var _b = color_get_blue(sprite.color)
         
-        _r = approach(_r, 255, 4)
-        _g = approach(_g, 255, 4)
-        _b = approach(_b, 255, 4)
+        _r = approach(_r, 255, 3)
+        _g = approach(_g, 255, 3)
+        _b = approach(_b, 255, 3)
         
         sprite.color = make_color_rgb(_r, _g, _b)
         
@@ -230,9 +234,9 @@ function BattleUnit(_name, _sprite) : BattleEntity("", noone) constructor {
         var _g = color_get_green(sprite.color)
         var _b = color_get_blue(sprite.color)
         
-        _r = approach(_r, 255, 5)
-        _g = approach(_g, 255, 5)
-        _b = approach(_b, 255, 5)
+        _r = approach(_r, 255, 3)
+        _g = approach(_g, 255, 3)
+        _b = approach(_b, 255, 3)
         
         sprite.color = make_color_rgb(_r, _g, _b)
         
@@ -272,7 +276,7 @@ function BattleUnit(_name, _sprite) : BattleEntity("", noone) constructor {
             } 
             
             if (keyboard_check(ord("X"))){
-                reduction = 0.8
+                reduction = 0.7
                 time_with_shield++
             } else {
                 reduction = 1
@@ -333,10 +337,8 @@ function BattleEnemy(_name, _sprite) : BattleEntity("", noone) constructor {
                     call_later(attack_anim_seconds, time_source_units_seconds, 
                     function(){
                         if(!target.jumping){
-                            var _parry = self.target.time_with_shield = clamp(self.target.time_with_shield, 1, 10)
-                            var _damage = (_parry) ? 0 : self.attack_damage * 4 // diminuindo dano se o parry der certo
+                            var _damage = self.attack_damage * 4 // diminuindo dano se o parry der certo
                             self.target.take_dmg(_damage)
-                            self.target.sprite.color = c_red
                         }
                         self.target.dodging = false
                         self.target.jumping = false
@@ -377,8 +379,8 @@ function BattleEnemy(_name, _sprite) : BattleEntity("", noone) constructor {
 }
 
 
-
-function Guerreiro(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
+// ENTIDADES ESPECÍFICAS
+function Guerreiro(_vida, _atk, _mag, ) : BattleUnit("", noone) constructor {
     hp = _vida
     max_hp = 130
     attack_damage = _atk
@@ -437,7 +439,7 @@ function Guerreiro(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
                     charge++
                     var _charge_left = charge_max - charge
                     
-                    if(keyboard_check_pressed(vk_space) or _charge_left <= 0){
+                    if(keyboard_check_pressed(ord("Z")) or _charge_left <= 0){
                         
                         if(_charge_left > 0){
                             if(_charge_left < charge_excellent){
@@ -547,6 +549,14 @@ function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
     
     magic_action = function(){
         if(action_state == -1) action_state = BattleActionStates.MAGIC_STARTING
+            
+        if(!array_contains(battle.enemies, target)){
+            action = -1
+            target = -1
+            finished_action = true
+            call_later(1, time_source_units_frames, function(){self.finished_action = false})
+            return
+        }
         
         switch (action_state) {
             case BattleActionStates.MAGIC_STARTING:
@@ -569,6 +579,7 @@ function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
                     var _inc = .4
                     
                     damage_to_deal += _inc
+                    audio_stop_sound(snd_blip)
                     audio_play_sound(snd_blip, 1, 0, .8, undefined, 1 + (damage_to_deal / 20))
                     /*var _plusind = instance_create_depth(draw_x + 6 + irandom_range(-3, 3), draw_y - 10, -1000, obj_mini_number_indicator)
                     _plusind.val = _inc*/
@@ -588,9 +599,11 @@ function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
                         
                         self.started_charging = false
                         self.attacked = false
-                        self.finished_action = true
                         
                         self.sprite.change(spr_mago_idle)
+                        
+                        call_later(1, time_source_units_seconds,
+                        function(){self.finished_action = true})
                     })
                 }
                 break
@@ -656,7 +669,7 @@ function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
 }
 
 function Dino() : BattleEnemy(250, noone) constructor {
-	name = "Dino"
+    name = "Dino"
 	sprite = new Sprite(spr_dino_idle)
 	
 	attack_anim_seconds = 1.5
@@ -714,10 +727,8 @@ function Dino() : BattleEnemy(250, noone) constructor {
                     call_later(attack_anim_seconds - .3, time_source_units_seconds, 
                     function(){
                         if(!target.jumping){
-                            var _parry = self.target.time_with_shield = clamp(self.target.time_with_shield, 1, 10)
-                            var _damage = (_parry) ? 0 : self.attack_damage * 4 // diminuindo dano se o parry der certo
+                            var _damage = self.attack_damage * 4 // diminuindo dano se o parry der certo
                             self.target.take_dmg(_damage)
-                            self.target.sprite.color = c_red
                         }
                         self.target.dodging = false
                         self.target.jumping = false
@@ -733,9 +744,27 @@ function Dino() : BattleEnemy(250, noone) constructor {
                     action_state = -1
                     
                     attacked = false
+                    
                     finished_action = true
                 }
                 break
         }
     }
+}
+
+
+function start_battle(_units, _enemies) {
+    var _inst = instance_create_depth(0, 0, -100, obj_battle)
+    
+    for(var i = 0; i < array_length(_units); i++){
+        _units[i].battle = _inst
+    }
+    
+    for(var i = 0; i < array_length(_enemies); i++){
+        _enemies[i].battle = _inst
+    }
+    
+    _inst.units = _units
+    _inst.enemies = _enemies
+    _inst.apply_start_anim()
 }

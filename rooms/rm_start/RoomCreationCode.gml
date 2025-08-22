@@ -7,7 +7,7 @@ vol_option.on_change = function(){
 audio_master_gain(.5)
 
 create_menu(new MenuGroup([
+    new MenuOption("Continuar", game_start),
     new MenuOption("Batalha", room_goto, rm_battle),
-    new MenuOption("Game", room_goto, rm_game),
     vol_option
-], "Menu Principal"))
+]))

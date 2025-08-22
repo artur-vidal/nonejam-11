@@ -7,3 +7,5 @@ tile_size = 12
 control = true
 
 sprite = new Sprite(spr_guerreiro_mini_frente)
+
+step_sound_cd = 0

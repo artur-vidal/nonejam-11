@@ -16,6 +16,9 @@ ylayouts = [
 
 max_entities = 3 // maximo de entidades de cada lado
 
+// timer pra desenhar tela preta na frente
+draw_black_overlay = 0
+black_overlay = surface_create(320, 240)
 
 // atualizar entidades
 update_all = function() {
@@ -67,7 +70,7 @@ apply_start_anim = function() {
     
     state = BattleStates.STARTING
     
-    var _unit_xoffset = -50
+    var _unit_xoffset = -60
     var _enemy_xoffset = 50
     
     var _starting_unit_x = 40
@@ -109,6 +112,8 @@ apply_start_anim = function() {
         }
         root.anim.add(_anim)
     }
+    
+    root.first_battle = false
 }
 
 // Estados
@@ -191,7 +196,7 @@ state_player = function(){
             return // quebrando pra não conflitar com mais nada
         }
         
-        if(keyboard_check_pressed(vk_space)) {
+        if(keyboard_check_pressed(ord("Z"))) {
             switch(available_actions[action_selection]) {
                 case BattleActions.ATTACK: selecting = BattleSelectionModes.ENEMIES; break;
                 case BattleActions.MAGIC: selecting = BattleSelectionModes.ENEMIES; break;
@@ -209,10 +214,10 @@ state_player = function(){
         else if(selected_entity < 0) selected_entity = array_length(units) - 1
         
         // voltando pra unit caso aperte esc
-        if(keyboard_check_pressed(vk_escape)) back_action()
+        if(keyboard_check_pressed(ord("X"))) back_action()
         
         // selecionando, definindo ação e passando pra próxima unidade
-        if(keyboard_check_pressed(vk_space)) select_action(units)
+        if(keyboard_check_pressed(ord("Z"))) select_action(units)
     }
     
     if(selecting == BattleSelectionModes.ENEMIES){
@@ -224,10 +229,10 @@ state_player = function(){
         change = sign(_change)
         
         // voltando pra unit caso aperte esc
-        if(keyboard_check_pressed(vk_escape)) back_action()
+        if(keyboard_check_pressed(ord("X"))) back_action()
         
         // selecionando, definindo ação e passando pra próxima unidade
-        if(keyboard_check_pressed(vk_space)) select_action(enemies)
+        if(keyboard_check_pressed(ord("Z"))) select_action(enemies)
     }
 }
 
@@ -269,7 +274,6 @@ state_enemy_attacks = function() {
 state = BattleStates.PLAYER_TURN
 
 // inicializando
-apply_start_anim()
 if(!audio_is_playing(msc_battle)){
     
     if(root.first_battle){
@@ -278,4 +282,3 @@ if(!audio_is_playing(msc_battle)){
         audio_play_sound(msc_battle, 1, 1, .7, 10.14)
     }
 }
-root.first_battle = false

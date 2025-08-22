@@ -1,0 +1,25 @@
+{
+  "$GMSound":"",
+  "%Name":"msc_final_boss_loop",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "bitRate":128,
+  "compression":0,
+  "conversionMode":0,
+  "duration":86.77878,
+  "name":"msc_final_boss_loop",
+  "parent":{
+    "name":"Musicas",
+    "path":"folders/Sounds/Musicas.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"msc_final_boss_loop.mp3",
+  "type":0,
+  "volume":0.85,
+}

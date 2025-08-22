@@ -1,61 +1,3 @@
-//// CONSTRUTORES GERAIS ////
-function Counter(_array_or_ds_list) constructor{
-    
-    counter = {}
-    
-    if(is_array(_array_or_ds_list)){
-        for(var i = 0; i < array_length(_array_or_ds_list); i++){
-            var _cur_value = string(_array_or_ds_list[i].food_id)
-            var _has_this_value = struct_exists(counter, _cur_value)
-            
-            if(_has_this_value) counter[$ _cur_value]++
-            else struct_set(counter, _cur_value, 1)
-        }
-    }
-    
-    else if(ds_exists(_array_or_ds_list, ds_type_list)){
-        for(var i = 0; i < ds_list_size(_array_or_ds_list); i++){
-            var _cur_value = string(_array_or_ds_list[| i].food_id)
-            var _has_this_value = struct_exists(counter, _cur_value)
-            
-            if(_has_this_value) counter[$ _cur_value]++
-            else struct_set(counter, _cur_value, 1)
-        }
-    }
-    
-    ///@desc Retorna um array de arrays [nome da variável, contagem], organizados da contagem mais alta à mais baixa
-    most_common = function(_reversed = false) {
-        var _value_array = []
-        var _names = struct_get_names(counter)
-        
-        for(var i = 0; i < array_length(_names); i++){
-            var _cur_name = _names[i]
-            
-            // excluindo alguns nomes
-            if(_cur_name != "most_common")
-            array_push(_value_array, [_cur_name, counter[$ _cur_name]])
-        }
-        
-        // organizando com um bubble sort
-        var n = array_length(_value_array)
-        for (var i = 0; i < n - 1; i++) {
-            for (var j = 0; j < n - i - 1; j++) {
-                var a = _value_array[j][1]
-                var b = _value_array[j + 1][1]
-                var condition = !_reversed ? (a < b) : (a > b)
-                
-                if (condition) {
-                    var temp = _value_array[j]
-                    _value_array[j] = _value_array[j + 1]
-                    _value_array[j + 1] = temp
-                }
-            }
-        }
-        
-        return _value_array
-    }
-}
-
 function Sprite(_asset) constructor{
     sprite = _asset
     image_ind = 0
@@ -71,6 +13,9 @@ function Sprite(_asset) constructor{
         x : 0,
         y : 0
     }
+    
+    flash_time = 60
+    flash_cooldown = 0
     
     change = function(_new_asset){
 		if(sprite != _new_asset){
@@ -131,9 +76,17 @@ function wave(_min, _max, _duration, _offset = 0){
     return _min + a4 + sin(angle) * a4;
 }
 
-function game_start(_vol, _rm){
-    audio_master_gain(_vol)
-    room_goto(_rm)
+function round_digits(_n, _digits){
+    var value = _n;
+    var dec = _digits;
+    
+    var mult = power(10, dec);
+    return floor(value*mult)/mult;
+}
+
+function game_start() {
+    audio_play_sound(msc_tension_min, 1, 1)
+    room_goto(rm_game)
 }
 
 function create_indicator(_x, _y, _val){

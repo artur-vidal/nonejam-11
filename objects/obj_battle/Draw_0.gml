@@ -1,3 +1,16 @@
+if(draw_black_overlay > 0){
+    application_surface_enable(false)
+    
+    surface_set_target(black_overlay)
+    draw_set_color(c_black)
+    draw_rectangle(0, 0, room_width, room_height, false)
+    
+    gpu_set_blendmode(bm_subtract)
+    
+} else {
+    application_surface_enable(true)
+}
+
 draw_all()
 
 if(state == BattleStates.PLAYER_TURN and array_length(available_actions) > 0){
@@ -53,4 +66,12 @@ if(state == BattleStates.PLAYER_TURN and array_length(available_actions) > 0){
     // maozinha
     draw_sprite(spr_hand_point, 0, _hand_x + wave(0, 5, 3), _hand_y)
     
+}
+
+if(draw_black_overlay > 0){
+	gpu_set_blendmode(bm_normal)
+	draw_set_color(c_white)
+	surface_reset_target()
+    
+    draw_surface(black_overlay, 0, 0)
 }

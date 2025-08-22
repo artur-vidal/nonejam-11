@@ -1,10 +1,10 @@
 {
   "$GMSprite":"",
   "%Name":"spr_guerreiro_mini_lado",
-  "bboxMode":0,
+  "bboxMode":2,
   "bbox_bottom":11,
   "bbox_left":0,
-  "bbox_right":8,
+  "bbox_right":11,
   "bbox_top":0,
   "collisionKind":1,
   "collisionTolerance":0,

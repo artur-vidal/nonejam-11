@@ -1,0 +1,1 @@
+start_battle([root.guerreiro, root.mago], [new Dino(), new Dino()])

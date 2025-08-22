@@ -83,10 +83,10 @@ wrap_pos = function(){
 
 draw_group = function(_x, _y, _group){
     
-    var _line_spacing = 5
+    var _line_spacing = 0
     var _previous_line_height = 0
     var _cur_y = _y
-    var _base_scale = 2
+    var _base_scale = .5
     var _is_active_group = _group == current_group
     
     for(var i = 0; i < array_length(_group.elements); i++){
@@ -94,16 +94,12 @@ draw_group = function(_x, _y, _group){
         // desenhando o título primeiro se houver um
         if(i == 0 and _group.label != ""){
             
-            scribble_anim_wheel(1, 11, .1)
-            
-            var _label = string_concat("[wheel]", _group.label)
+            var _label = string_concat("", _group.label)
             var _text = scribble(_label)
                 .starting_format("fnt_menu", (_is_active_group) ? c_white : c_gray)
                 .scale(_base_scale * 2/3)
             
             _text.draw(_x + _group.option_offset.x, _cur_y + _group.option_offset.y)
-            
-            scribble_anim_reset()
             
             _previous_line_height = _text.get_height()
             _cur_y += _line_spacing + _previous_line_height

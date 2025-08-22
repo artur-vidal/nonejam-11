@@ -1,0 +1,25 @@
+{
+  "$GMSound":"",
+  "%Name":"msc_tension_min",
+  "audioGroupId":{
+    "name":"audiogroup_default",
+    "path":"audiogroups/audiogroup_default",
+  },
+  "bitDepth":1,
+  "bitRate":128,
+  "compression":0,
+  "conversionMode":0,
+  "duration":32.000046,
+  "name":"msc_tension_min",
+  "parent":{
+    "name":"Musicas",
+    "path":"folders/Sounds/Musicas.yy",
+  },
+  "preload":false,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"msc_tension_min.wav",
+  "type":0,
+  "volume":1.0,
+}

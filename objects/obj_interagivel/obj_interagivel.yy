@@ -8,8 +8,8 @@
   "name":"obj_interagivel",
   "overriddenProperties":[],
   "parent":{
-    "name":"Objects",
-    "path":"folders/Objects.yy",
+    "name":"Interagiveis",
+    "path":"folders/Objects/Interagiveis.yy",
   },
   "parentObjectId":{
     "name":"obj_colisao",

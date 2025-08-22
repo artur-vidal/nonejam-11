@@ -63,7 +63,7 @@ function MenuOption(_label, _action = -1, _args = -1) constructor{
     parent_menu = -1
     parent_group = -1
     
-    base_draw_scale = 2
+    base_draw_scale = .5
     
     effect = {
         type : MenuOptionSelectionEffects.NO_EFFECT,
@@ -158,9 +158,8 @@ function MenuOption(_label, _action = -1, _args = -1) constructor{
         
         // desenhando texto
         scribble_anim_rainbow(.8, -.01)
-        scribble_anim_wheel(1, 11, .1)
         
-        var _final_string = string_concat("[wheel]", _scribble_effects, label)
+        var _final_string = string_concat("", _scribble_effects, label)
         var _text = scribble(_final_string)
             .starting_format("fnt_menu", _color)
             .scale(_scale)
@@ -169,8 +168,6 @@ function MenuOption(_label, _action = -1, _args = -1) constructor{
             _labelx + parent_group.option_offset.x + offset.x, 
             _labely + parent_group.option_offset.y + offset.y
         )
-        
-        scribble_anim_reset()
     }
     
     draw_icon = function(_iconx, _icony, _index, _scale, _color){
@@ -301,6 +298,7 @@ function MenuSelection(_label, _option_array, _wrap = false) : MenuOption("", -1
     
     icon.sprite = spr_menu_option_select_arrow
     icon.effect = MenuOptionIconEffects.UP_DOWN
+    icon.offset.y = 4
     
     set_index = function(_ind){
         index = _ind
@@ -404,10 +402,10 @@ function MenuSelection(_label, _option_array, _wrap = false) : MenuOption("", -1
         draw_sprite_ext(icon.sprite, _index, _x, _y + (8 * _scale), -_scale, _scale, 0, _left_color, 1)
         
         // opção selecionada
-        var _text = scribble(string_concat("[wheel]", icon_label))
+        var _text = scribble(string_concat("", icon_label))
             .starting_format("fnt_menu", _color)
             .scale(_scale)
-        _text.draw(_x + (8 * _scale), _y - 10)
+        _text.draw(_x + (8 * _scale), _y - 3)
         
         // seta direita
         // diminuindo saturação se as opções tiverem acabado
