@@ -18,15 +18,15 @@ pitch_max = 1
 
 font = fnt_default
 
-box_width = 144
-box_height = 12 * 3
+box_width = 160
+box_height = 16 * 3
 
 box_x = 0
-box_y = 108
+box_y = 128
 
 appearing = true
 root.anim.add(
-    new Animation(id, "box_y", box_y, 108 - box_height, 1.5)
+    new Animation(id, "box_y", box_y, box_y - box_height, 1.5)
         .complete_callback(function(_){_.typist.in(.2, 0); _.appearing = false;})
         .callback_args(id)
 )

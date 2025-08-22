@@ -16,9 +16,12 @@ ylayouts = [
 
 max_entities = 3 // maximo de entidades de cada lado
 
+music = msc_battle
+
 // timer pra desenhar tela preta na frente
 draw_black_overlay = 0
 black_overlay = surface_create(320, 240)
+black_overlay_alpha = 1
 
 // atualizar entidades
 update_all = function() {
@@ -66,6 +69,7 @@ redefine_targets = function(){
 }
 
 // inicializando tudo
+delay_start = 0
 apply_start_anim = function() {
     
     state = BattleStates.STARTING
@@ -74,7 +78,7 @@ apply_start_anim = function() {
     var _enemy_xoffset = 50
     
     var _starting_unit_x = 40
-    var _starting_enemy_x = room_width - 40
+    var _starting_enemy_x = 120
     
     var _base_delay = (root.first_battle) ? 3 : 0
     var _duration = (root.first_battle) ? 2.5 : 1
@@ -131,6 +135,8 @@ action_labels[BattleActions.ATTACK] = "Ataque"
 action_labels[BattleActions.MAGIC] = "Magia"
 action_labels[BattleActions.CHARGE] = "Concentrar"
 action_labels[BattleActions.HEAL] = "Curar"
+
+ending = false
 
 set_current_unit = function() {
     current_unit = -1
@@ -271,14 +277,17 @@ state_enemy_attacks = function() {
     }
 }
 
-state = BattleStates.PLAYER_TURN
-
-// inicializando
-if(!audio_is_playing(msc_battle)){
-    
-    if(root.first_battle){
-        audio_play_sound(msc_battle, 1, 1, .7)
-    } else {
-        audio_play_sound(msc_battle, 1, 1, .7, 10.14)
-    }
+state_end = function(){
+	if(!ending){
+		show_debug_message("acabano")
+		call_later(5, time_source_units_seconds,
+		function(){
+			create_transition(120, function(){
+				end_battle()
+			})	
+		})
+		ending = true
+	}
 }
+
+state = BattleStates.PLAYER_TURN

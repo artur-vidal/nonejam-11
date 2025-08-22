@@ -5,6 +5,6 @@ cur_time = 0
 
 out = false
 
-on_mid_activation = function(){
-    show_debug_message("voltano")
-}
+on_mid_activation = function(){}
+
+show_debug_message("ino")

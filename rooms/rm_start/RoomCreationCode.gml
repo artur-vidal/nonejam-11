@@ -8,6 +8,5 @@ audio_master_gain(.5)
 
 create_menu(new MenuGroup([
     new MenuOption("Continuar", game_start),
-    new MenuOption("Batalha", room_goto, rm_battle),
     vol_option
 ]))

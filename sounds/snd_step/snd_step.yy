@@ -12,8 +12,8 @@
   "duration":0.115011334,
   "name":"snd_step",
   "parent":{
-    "name":"Musicas",
-    "path":"folders/Sounds/Musicas.yy",
+    "name":"Sounds",
+    "path":"folders/Sounds.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

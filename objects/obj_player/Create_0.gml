@@ -1,8 +1,8 @@
 velh = 0
 velv = 0
-max_vel = .5
+max_vel = 1
 
-tile_size = 12
+tile_size = 16
 
 control = true
 

@@ -64,6 +64,9 @@ function BattleEntity(_name, _sprite) constructor{
         x : 0,
         y : 0,
     }
+	
+	default_sprite = noone
+	hurt_sprite = noone
     
     shadow_offset = {
         x : 0,
@@ -91,6 +94,11 @@ function BattleEntity(_name, _sprite) constructor{
         } else {
             audio_play_sound((_crit) ? snd_crit : snd_hurt, 1, 0)
             sprite.color = c_red
+			if(hurt_sprite != noone){
+				sprite.change(hurt_sprite)
+				call_later(1.5, time_source_units_seconds, 
+				function(){self.sprite.change(default_sprite)})
+			}
         }
         
         var _final_dmg = _dmg * reduction
@@ -119,6 +127,11 @@ function BattleEntity(_name, _sprite) constructor{
     die = function() {
         
     }
+	
+	revive = function() {
+		dead = false
+		heal(max_hp / 2)
+	}
     
     set_pos = function(_x, _y) {
         x = _x
@@ -189,6 +202,7 @@ function BattleUnit(_name, _sprite) : BattleEntity("", noone) constructor {
     started_healing = false
     healed = false
     heal_anim_seconds = 1
+	turns_to_revive = 2
     
     dodging = false
     jumping = false
@@ -251,7 +265,9 @@ function BattleUnit(_name, _sprite) : BattleEntity("", noone) constructor {
                     case BattleActions.HEAL: heal_action(); break;
                     case BattleActions.CHARGE: charge_action(); break;
                 }
-            }
+            }else if(dead){
+				finished_action = true;
+			}
             
         } 
         
@@ -395,6 +411,9 @@ function Guerreiro(_vida, _atk, _mag, ) : BattleUnit("", noone) constructor {
         BattleActions.CHARGE
     ]
     
+	default_sprite = spr_guerreiro_idle
+	hurt_sprite = spr_guerreiro_hit
+	
     attack_action = function() {
         if(action_state == -1) action_state = BattleActionStates.ATTACK_WALKING
         
@@ -546,6 +565,9 @@ function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
         BattleActions.MAGIC,
         BattleActions.HEAL
     ]
+	
+	default_sprite = spr_mago_idle
+	hurt_sprite = spr_mago_hit
     
     magic_action = function(){
         if(action_state == -1) action_state = BattleActionStates.MAGIC_STARTING
@@ -554,7 +576,7 @@ function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
             action = -1
             target = -1
             finished_action = true
-            call_later(1, time_source_units_frames, function(){self.finished_action = false})
+            call_later(3, time_source_units_frames, function(){self.finished_action = false})
             return
         }
         
@@ -577,6 +599,8 @@ function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
                 
                 if(keyboard_check_pressed(vk_anykey)){
                     var _inc = .4
+					
+					create_indicator(irandom_range(x - 12, x + 12), y, keyboard_lastchar, true)
                     
                     damage_to_deal += _inc
                     audio_stop_sound(snd_blip)
@@ -752,8 +776,13 @@ function Dino() : BattleEnemy(250, noone) constructor {
     }
 }
 
-
-function start_battle(_units, _enemies) {
+function start_battle(_units, _enemies, _start_frames = 0, _song = msc_battle) {
+	// tirando controle do player e manipulando câmera
+	obj_player.control = false
+	obj_camera.control_mode = "battle"
+	
+	audio_stop_all()
+	
     var _inst = instance_create_depth(0, 0, -100, obj_battle)
     
     for(var i = 0; i < array_length(_units); i++){
@@ -766,5 +795,13 @@ function start_battle(_units, _enemies) {
     
     _inst.units = _units
     _inst.enemies = _enemies
-    _inst.apply_start_anim()
+	_inst.music = _song
+	_inst.delay_start = _start_frames
+}
+
+function end_battle() {
+	instance_destroy(obj_battle)
+	obj_camera.control_mode = "dungeon"
+	obj_camera.spawning = true
+	obj_player.control = false
 }

@@ -1,7 +1,7 @@
 var _horizontal = keyboard_check(vk_right) - keyboard_check(vk_left)
 var _vertical = keyboard_check(vk_down) - keyboard_check(vk_up)
 
-var _left = x - 6
+var _left = x - tile_size / 2
 
 if((_left % tile_size == 0 and y % tile_size == 0) and control){
     if(_horizontal != 0 xor _vertical != 0) {
@@ -31,9 +31,8 @@ if(step_sound_cd < 0){
 }
 
 if(keyboard_check_pressed(ord("Z")) and control and (velh == 0 and velv == 0)) {
-    var _interagivel = collision_circle(x - 1, y - 7, 7, obj_interagivel, false, true)
+    var _interagivel = collision_circle(x - 1, y - 9, 9, obj_interagivel, false, true)
     if(_interagivel) {
-        if(array_length(_interagivel.texto) > 0) create_dialogue(_interagivel.texto)
 		_interagivel.action()
     }
 }

@@ -9,7 +9,7 @@ if(place_meeting(x + velh, y, obj_colisao)){
     velh = 0
 }
 
-x += velh
+x += velh / 2
 
 if(place_meeting(x, y + velv, obj_colisao)){
     var _colisao = instance_place(x, y + velv, obj_colisao)
@@ -22,4 +22,4 @@ if(place_meeting(x, y + velv, obj_colisao)){
     velv = 0
 }
 
-y += velv
+y += velv / 2

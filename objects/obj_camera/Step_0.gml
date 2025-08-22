@@ -1,8 +1,6 @@
 move()
 camera_set_view_size(view_camera[0], width, height)
 
-show_debug_message($"{cx}, {cy}")
-
 player = instance_find(obj_player, 0)
 if(!instance_exists(player)){
 	exit
@@ -12,3 +10,9 @@ if(!instance_exists(player)){
 
 target_x = (player.x div width) * width
 target_y = ((player.y - 12) div height) * height
+
+if(spawning){
+	cx = target_x
+	cy = target_y
+	spawning = false
+}

@@ -1,6 +1,10 @@
 if(!out){
     cur_time = approach(cur_time, total_time, 1)
-    if(cur_time == total_time) out = true
+    if(cur_time == total_time){
+		out = true
+		on_mid_activation()
+		show_debug_message("voltano")
+	}
 } else {
     
     cur_time = approach(cur_time, 0, 1)

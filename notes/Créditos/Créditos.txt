@@ -3,8 +3,8 @@
 - Scribble por JujuAdams  
 (https://github.com/JujuAdams/Scribble)
 
-- TurboGML por Foxy Of Jungle 
-(https://github.com/FoxyOfJungle/TurboGML)
+- DoLater por JujuAdams
+(https://github.com/JujuAdams/DoLater)
 
 ### ÁUDIO
 - Som de parry - nekoninja (Pixabay)

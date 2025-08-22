@@ -76,6 +76,14 @@ function wave(_min, _max, _duration, _offset = 0){
     return _min + a4 + sin(angle) * a4;
 }
 
+function approach(val1, val2, amount) {
+    if (val1 < val2) {
+        return min(val1 + amount, val2);
+    } else {
+        return max(val1 - amount, val2);
+    }
+}
+
 function round_digits(_n, _digits){
     var value = _n;
     var dec = _digits;
@@ -89,9 +97,10 @@ function game_start() {
     room_goto(rm_game)
 }
 
-function create_indicator(_x, _y, _val){
-    instance_create_depth(_x, _y, -100, obj_number_indicator).val = _val
+function create_indicator(_x, _y, _val, _mini = false){
+    instance_create_depth(_x, _y, -888, (_mini) ? obj_mini_number_indicator : obj_number_indicator).val = _val
 }
+
 
 function create_dialogue(_text_array, _sound = snd_text_mid, _pitch_min = 1, _pitch_max = 1, _font = fnt_default){
 	if(root.dialogue_create_cooldown > 0 or instance_exists(obj_ow_dialogue)){
@@ -104,4 +113,12 @@ function create_dialogue(_text_array, _sound = snd_text_mid, _pitch_min = 1, _pi
     _box.sound = _sound
     _box.pitch_min = _pitch_min
     _box.pitch_max = _pitch_max
+}
+
+function create_transition(_dur, _on_switch = function(){}) {
+	obj_player.control = false
+	
+	var _inst = instance_create_depth(0, 0, -999, obj_transicao)
+	_inst.duration = _dur
+	_inst.on_mid_activation = _on_switch
 }
