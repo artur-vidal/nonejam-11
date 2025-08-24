@@ -4,22 +4,22 @@
   "bboxMode":0,
   "bbox_bottom":23,
   "bbox_left":0,
-  "bbox_right":17,
-  "bbox_top":9,
+  "bbox_right":19,
+  "bbox_top":8,
   "collisionKind":1,
   "collisionTolerance":0,
   "DynamicTexturePage":false,
   "edgeFiltering":false,
   "For3D":false,
   "frames":[
-    {"$GMSpriteFrame":"","%Name":"a26adccc-003a-47e4-90ba-65efc791db18","name":"a26adccc-003a-47e4-90ba-65efc791db18","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"","%Name":"05882f62-7faf-4fa2-b004-9b1a04b5fdd6","name":"05882f62-7faf-4fa2-b004-9b1a04b5fdd6","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
   ],
   "gridX":0,
   "gridY":0,
   "height":24,
   "HTile":false,
   "layers":[
-    {"$GMImageLayer":"","%Name":"01499060-96af-4b67-b11d-760ffa88cc45","blendMode":0,"displayName":"default","isLocked":false,"name":"01499060-96af-4b67-b11d-760ffa88cc45","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
+    {"$GMImageLayer":"","%Name":"4c36dd1a-0ef4-4a1b-b4ec-9ce958539255","blendMode":0,"displayName":"default","isLocked":false,"name":"4c36dd1a-0ef4-4a1b-b4ec-9ce958539255","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
   ],
   "name":"spr_guerreiro_morte",
   "nineSlice":null,
@@ -71,8 +71,8 @@
     "tracks":[
       {"$GMSpriteFramesTrack":"","builtinName":0,"events":[],"inheritsTrackColour":true,"interpolation":1,"isCreationTrack":false,"keyframes":{"$KeyframeStore<SpriteFrameKeyframe>":"","Keyframes":[
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"a26adccc-003a-47e4-90ba-65efc791db18","path":"sprites/spr_guerreiro_morte/spr_guerreiro_morte.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"3fc3e8b5-067d-4718-846f-1c5bb1de310a","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"05882f62-7faf-4fa2-b004-9b1a04b5fdd6","path":"sprites/spr_guerreiro_morte/spr_guerreiro_morte.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"b2afbe69-1587-4c74-9fa1-07d3aeb08d12","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],
     "visibleRange":null,

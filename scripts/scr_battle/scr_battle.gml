@@ -4,7 +4,8 @@ enum BattleStates {
     PLAYER_ACT,
     ENEMY_ATTACKING,
 	DIALOGUE,
-	END
+	END,
+    GAME_OVER
 }
 
 enum BattleActions {
@@ -12,6 +13,7 @@ enum BattleActions {
     MAGIC,
     HEAL,
     CHARGE,
+    MEDITATE,
     COUNT
 }
 
@@ -25,6 +27,27 @@ enum BattleActionStates {
     MAGIC_STARTING,
     MAGIC_CHARGING,
     MAGIC_RELEASE
+}
+
+enum BattleBossActions {
+    JUMP_ATTACK,
+    TACKLE,
+    BEAM,
+    CHARGE
+}
+
+enum BattleBossActionStates {
+    TACKLE_PREP,
+    TACKLE_CHARGE,
+    TACKLE_ATTACK,
+    TACKLE_LEAVE,
+    CHARGE_ANIM,
+    JUMP_PREP,
+    JUMP_JUMP,
+    JUMP_LAND,
+    JUMP_LEAVE,
+    BEAM_PREP,
+    BEAM_ATTACK
 }
 
 enum BattleSelectionModes {
@@ -45,6 +68,9 @@ function BattleEntity(_name, _sprite) constructor{
     max_hp = 100
     hp = max_hp
     
+    mana = 20
+    max_mana = 20
+    
     attack_damage = 5
     magic_damage = 5
     available_actions = [
@@ -58,8 +84,8 @@ function BattleEntity(_name, _sprite) constructor{
     y = 0
     
     sprite = _sprite
-    draw_x = 0
-    draw_y = 0
+    draw_x = -100
+    draw_y = -100
     offset = {
         x : 0,
         y : 0,
@@ -67,6 +93,8 @@ function BattleEntity(_name, _sprite) constructor{
 	
 	default_sprite = noone
 	hurt_sprite = noone
+	dead_sprite = noone
+    happy_sprite = noone
     
     shadow_offset = {
         x : 0,
@@ -89,14 +117,14 @@ function BattleEntity(_name, _sprite) constructor{
         if(time_with_shield == clamp(time_with_shield, 1, 7)){
             audio_play_sound(snd_parry, 1, 0, 1.3)
             reduction = 0
-            // sprite.color = #88c070
             battle.draw_black_overlay = 8
+            if(hp < max_hp) heal(round(max_hp * 0.15))
         } else {
             audio_play_sound((_crit) ? snd_crit : snd_hurt, 1, 0)
             sprite.color = c_red
-			if(hurt_sprite != noone){
+			if(hurt_sprite != noone and _dmg * reduction <= hp - max_hp){
 				sprite.change(hurt_sprite)
-				call_later(1.5, time_source_units_seconds, 
+				call_later(1, time_source_units_seconds, 
 				function(){self.sprite.change(default_sprite)})
 			}
         }
@@ -122,6 +150,13 @@ function BattleEntity(_name, _sprite) constructor{
         
         audio_play_sound(snd_heal, 1, 0)
         create_indicator(x + offset.x, y + offset.y - 12, _heal_diff)
+    }
+    
+    use_mana = function(_val) {
+        audio_play_sound(snd_charge, 1, 0)
+        sprite.color = c_blue
+        mana -= _val
+        create_indicator(x, y - 8, -_val, true)
     }
     
     die = function() {
@@ -191,9 +226,9 @@ function BattleUnit(_name, _sprite) : BattleEntity("", noone) constructor {
     charge = 0
     charge_max = 90
     
-    charge_ok = charge_max / 1.2
-    charge_good = charge_max / 2
-    charge_excellent = charge_max / 4
+    charge_ok = charge_max / 2
+    charge_good = charge_max / 4
+    charge_excellent = charge_max / 6
     
     attacked = false
     damage_to_deal = 0
@@ -215,6 +250,8 @@ function BattleUnit(_name, _sprite) : BattleEntity("", noone) constructor {
     
     fire_sprite = new Sprite(spr_fire)
     fire_sprite.alpha = .8
+    
+    turns_to_revive = 0
      
     root.anim.add(
         new Animation(self.fire_sprite, "xscale", .6, .9, 1.7)
@@ -225,6 +262,12 @@ function BattleUnit(_name, _sprite) : BattleEntity("", noone) constructor {
             .ease(ease_in_out_quad)
             .type(AnimationTypes.PATROL)
     )
+    
+    die = function() {
+        if(dead_sprite != noone) sprite.change(dead_sprite)
+        turns_to_revive = 3
+        battle.turn_particles_on(x, y, 30)
+    }
     
     attack_action = function() {
         
@@ -242,6 +285,10 @@ function BattleUnit(_name, _sprite) : BattleEntity("", noone) constructor {
         
     }
     
+    meditate_action = function() {
+        
+    }
+    
     main_update = function(){
         // voltando a cor da sprite
         var _r = color_get_red(sprite.color)
@@ -254,51 +301,69 @@ function BattleUnit(_name, _sprite) : BattleEntity("", noone) constructor {
         
         sprite.color = make_color_rgb(_r, _g, _b)
         
-        if(hp > max_hp) hp = max_hp
-        
-        if(battle.units[battle.current_unit] == self){
+        hp = clamp(hp, 0, max_hp)
+        mana = clamp(mana, 0, max_mana)
             
-            if(battle.state == BattleStates.PLAYER_ACT){
-                switch(action){
-                    case BattleActions.ATTACK: attack_action(); break;
-                    case BattleActions.MAGIC: magic_action(); break;
-                    case BattleActions.HEAL: heal_action(); break;
-                    case BattleActions.CHARGE: charge_action(); break;
-                }
-            }else if(dead){
-				finished_action = true;
-			}
-            
-        } 
-        
-        if(dodging and !jumping) {
-            
-            if(keyboard_check_pressed(ord("Z"))){
-                jumping = true
-                root.anim.add(
-                    new Animation(self.offset, "y", 0, -jump_height, jump_duration)
-                        .ease(ease_out_quad),
-                        
-                    new Animation(self.offset, "y", -jump_height, 0, jump_duration)
-                        .ease(ease_in_quad)
-                        .delay(jump_duration)
-                        .complete_callback(function(_){
-                            _.offset.y = 0
-                            _.jumping = false 
-                        })
-                        .callback_args(self)
-                )
-                return
+        if(!dead){
+            if(battle.units[battle.current_unit] == self){
+                
+                if(battle.state == BattleStates.PLAYER_ACT){
+                    switch(action){
+                        case BattleActions.ATTACK: attack_action(); break;
+                        case BattleActions.MAGIC: magic_action(); break;
+                        case BattleActions.HEAL: heal_action(); break;
+                        case BattleActions.CHARGE: charge_action(); break;
+                        case BattleActions.MEDITATE: meditate_action(); break;
+                    }
+                }else if(dead){
+    				finished_action = true;
+    			}
+                
             } 
             
-            if (keyboard_check(ord("X"))){
-                reduction = 0.7
-                time_with_shield++
-            } else {
-                reduction = 1
-                time_with_shield = 0
+            if(dodging and !jumping) {
+                
+                if(keyboard_check_pressed(ord("Z"))){
+                    jumping = true
+                    audio_play_sound(snd_jump, 1, 0)
+                    root.anim.add(
+                        new Animation(self.offset, "y", 0, -jump_height, jump_duration)
+                            .ease(ease_out_quad),
+                            
+                        new Animation(self.offset, "y", -jump_height, 0, jump_duration)
+                            .ease(ease_in_quad)
+                            .delay(jump_duration)
+                            .complete_callback(function(_){
+                                _.offset.y = 0
+                                _.jumping = false 
+                            })
+                            .callback_args(self)
+                    )
+                    return
+                } 
+                
+                if (keyboard_check(ord("X"))){
+                    reduction = 0.6
+                    time_with_shield++
+                } else {
+                    reduction = 1
+                    time_with_shield = 0
+                }
+            }
+        } else {
+            if(battle.state == BattleStates.PLAYER_ACT and battle.units[battle.current_unit] == self){
+                finished_action = true
+                turns_to_revive = approach(turns_to_revive, 0, 1)
+                if(turns_to_revive == 0){
+                    heal(max_hp * 0.5)
+                    sprite.change(default_sprite)
+                    dead = false
+                    call_later(2, time_source_units_frames,
+                    function(){self.finished_action = false})
+                }
             }
         }
+        
         
         
         fire_sprite.animate(1)
@@ -321,10 +386,21 @@ function BattleEnemy(_name, _sprite) : BattleEntity("", noone) constructor {
     attacked = false
     attack_anim_seconds = 1
     
+    find_alive_target = function() {
+        if(battle.units[0].dead and battle.units[1].dead){
+            finished_action = true
+            return
+        }
+        do {
+            target = battle.units[irandom(array_length(battle.units) - 1)]
+        } until(!target.dead)
+    }
+    
     die = function() {
         with(battle) {
             for(var i = 0; i < array_length(enemies); i++){
                 if(enemies[i] == other){
+                    turn_particles_on(other.x, other.y, 30)
 					array_delete(enemies, i, 1)
 					redefine_targets()
 				}
@@ -334,7 +410,7 @@ function BattleEnemy(_name, _sprite) : BattleEntity("", noone) constructor {
     
     attack_state = function() {
         if(action_state == -1) action_state = BattleActionStates.ATTACK_WALKING
-        if(target == -1) target = battle.units[irandom(array_length(battle.units) - 1)]
+        if(target == -1) find_alive_target()
         
         var _targetx, _targety, _dir, _dist
         
@@ -390,13 +466,15 @@ function BattleEnemy(_name, _sprite) : BattleEntity("", noone) constructor {
         }
         
         if(hp > max_hp) hp = max_hp
+        if(mana > max_mana) mana = max_mana
     }
     
 }
 
 
+
 // ENTIDADES ESPECÍFICAS
-function Guerreiro(_vida, _atk, _mag, ) : BattleUnit("", noone) constructor {
+function Guerreiro(_vida, _atk, _mag) : BattleUnit("Gui", noone) constructor {
     hp = _vida
     max_hp = 130
     attack_damage = _atk
@@ -413,6 +491,8 @@ function Guerreiro(_vida, _atk, _mag, ) : BattleUnit("", noone) constructor {
     
 	default_sprite = spr_guerreiro_idle
 	hurt_sprite = spr_guerreiro_hit
+    dead_sprite = spr_guerreiro_morte
+    happy_sprite = spr_guerreiro_win
 	
     attack_action = function() {
         if(action_state == -1) action_state = BattleActionStates.ATTACK_WALKING
@@ -420,12 +500,15 @@ function Guerreiro(_vida, _atk, _mag, ) : BattleUnit("", noone) constructor {
         switch (action_state) {
             case BattleActionStates.ATTACK_WALKING:
                 
-                if(sprite.sprite != spr_guerreiro_move) sprite.change(spr_guerreiro_move)
+                sprite.change(spr_guerreiro_move)
+                sprite.image_spd = 2
                 
                 var _arrived = go_to_point(target.x - 48, target.y, 2)
                 if(_arrived) {
                     action_state = BattleActionStates.ATTACK_CHARGING
                     audio_play_sound(snd_jump, 1, 0)
+                    
+                    sprite.change(spr_guerreiro_prep_ataque)
                     
                     // adicionando animação de pulo
                     var _duration = charge_max / 60
@@ -462,36 +545,40 @@ function Guerreiro(_vida, _atk, _mag, ) : BattleUnit("", noone) constructor {
                         
                         if(_charge_left > 0){
                             if(_charge_left < charge_excellent){
-                                damage_to_deal = attack_damage * 3 * 1.25
+                                damage_to_deal = attack_damage * 3 * 1.5
                             } else if(_charge_left < charge_good) {
-                                damage_to_deal = attack_damage
+                                damage_to_deal = attack_damage * 3
                             } else if(_charge_left < charge_ok) {
                                 damage_to_deal = attack_damage * 3 * 0.75
                             } else {
-                                damage_to_deal = attack_damage
+                                damage_to_deal = attack_damage * 3 * 0.3
                             }
                         } else {
                             damage_to_deal = attack_damage
                         }
                         
-                        charge = 0
                         attacked = true
                         
                         root.anim.finish("guerreiro_pulo")
                         sprite.change(spr_guerreiro_ataque)
                         
-                        var _remaining = charge / 60
-                        
-                        call_later(_remaining, time_source_units_seconds, 
+                        call_later(1, time_source_units_frames, 
                         function(){
-                            if(concentrating) {
-                                damage_to_deal *= 2.5
-                                instance_create_depth(target.x, target.y - 12, -100, obj_explosion)
+                            var _was_excellent = self.charge_max - self.charge < self.charge_excellent
+                            
+                            if(concentrating) damage_to_deal *= 2.5
+                            
+                            if(_was_excellent){
+                                battle.turn_particles_on(target.x, target.y, 30)
+                                battle.draw_black_overlay = 8
+                                audio_play_sound(snd_excellent, 1, 0, 1, undefined, .8, 1.1)
                             }
-                            self.target.take_dmg(self.damage_to_deal, self.charge_max - self.charge > self.charge_excellent)
+                            
+                            self.target.take_dmg(self.damage_to_deal, _was_excellent)
                             self.concentrating = false
                             call_later(1, time_source_units_seconds, function(){
                                 self.sprite.change(spr_guerreiro_move)
+                                self.sprite.image_spd = 2
 								self.draw_y -= 14
                                 self.sprite.xscale = -1
                                 self.action_state = BattleActionStates.ATTACK_LEAVING
@@ -509,9 +596,11 @@ function Guerreiro(_vida, _atk, _mag, ) : BattleUnit("", noone) constructor {
                     action_state = -1
                     
                     attacked = false
+                    charge = 0
                     finished_action = true
                     
                     sprite.change(spr_guerreiro_idle)
+                    sprite.image_spd = 1
                     sprite.xscale = 1
                 }
                 break
@@ -519,15 +608,16 @@ function Guerreiro(_vida, _atk, _mag, ) : BattleUnit("", noone) constructor {
     }
     
     charge_action = function() {
-        if(action_state == -1) action_state = BattleActionStates.CHARGE_ANIM
+        if(action_state == -1){
+            action_state = BattleActionStates.CHARGE_ANIM
+        }
             
         switch(action_state) {
             case BattleActionStates.CHARGE_ANIM:
                 if(!started_charging){
-                    call_later(heal_anim_seconds, time_source_units_seconds,
+                    call_later(1, time_source_units_seconds,
                     function(){
-                        audio_play_sound(snd_charge, 1, 0)
-                        self.sprite.color = c_blue
+                        self.use_mana(4)
                         
                         self.action = -1
                         self.target = -1
@@ -535,7 +625,9 @@ function Guerreiro(_vida, _atk, _mag, ) : BattleUnit("", noone) constructor {
                         
                         self.concentrating = true
                         self.started_charging = false
-                        self.finished_action = true
+                        
+                        call_later(1, time_source_units_seconds,
+                        function(){self.finished_action = true})
                     }) 
                     started_charging = true
                 }
@@ -545,39 +637,49 @@ function Guerreiro(_vida, _atk, _mag, ) : BattleUnit("", noone) constructor {
     
     draw = function() {
         // draw_healthbar(draw_x - 9, draw_y + 4, draw_x + 8, draw_y + 8, charge / charge_max * 100, #081820, c_red, c_aqua, 0, true, true)
+        sprite.animate(2)
     }
 }
 
-function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
+function Mago(_vida, _atk, _mag) : BattleUnit("Meg", noone) constructor {
     hp = _vida
     max_hp = 80
+    
+    mana = 60
+    max_mana = 60
     
     attack_damage = _atk
     magic_damage = _mag
     
     sprite = new Sprite(spr_mago_idle)
     
-    charge_max = 180
+    charge_max = 300
     magic_start_seconds = 2
     started_charging = false
     
     available_actions = [
         BattleActions.MAGIC,
-        BattleActions.HEAL
+        BattleActions.HEAL,
+        BattleActions.MEDITATE
     ]
 	
 	default_sprite = spr_mago_idle
 	hurt_sprite = spr_mago_hit
+    dead_sprite = spr_mago_morte
+    happy_sprite = spr_mago_win
     
     magic_action = function(){
-        if(action_state == -1) action_state = BattleActionStates.MAGIC_STARTING
-            
-        if(!array_contains(battle.enemies, target)){
+        if(!array_contains(battle.enemies, target) or target == -1){
             action = -1
             target = -1
             finished_action = true
-            call_later(3, time_source_units_frames, function(){self.finished_action = false})
+            call_later(2, time_source_units_frames, function(){self.finished_action = false})
             return
+        }
+        
+        if(action_state == -1){
+            use_mana(12)
+            action_state = BattleActionStates.MAGIC_STARTING
         }
         
         switch (action_state) {
@@ -595,27 +697,39 @@ function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
                 
             case BattleActionStates.MAGIC_CHARGING:
                 charge--
-                if(sprite.sprite != spr_mago_move) sprite.change(spr_mago_move)
+                sprite.change(spr_mago_move)
                 
                 if(keyboard_check_pressed(vk_anykey)){
-                    var _inc = .4
+                    var _inc = .2
 					
 					create_indicator(irandom_range(x - 12, x + 12), y, keyboard_lastchar, true)
                     
                     damage_to_deal += _inc
                     audio_stop_sound(snd_blip)
                     audio_play_sound(snd_blip, 1, 0, .8, undefined, 1 + (damage_to_deal / 20))
-                    /*var _plusind = instance_create_depth(draw_x + 6 + irandom_range(-3, 3), draw_y - 10, -1000, obj_mini_number_indicator)
-                    _plusind.val = _inc*/
                 }
                 
                 if(charge <= 0){
-                    sprite.change(spr_mago_ataque)
+                    
                     action_state = BattleActionStates.MAGIC_RELEASE
                     
-                    call_later(3, time_source_units_seconds, 
+                    sprite.image_spd = 0
+                    sprite.change(spr_mago_ataque)
+                    sprite.offset.x = 0;
+                    
+                    var _circs = floor(point_distance(x, y, target.x + target.offset.x, target.y + target.offset.y) / 6)
+                    create_beam(x + 12, y - 8, point_direction(x, y, target.x, target.y - 8), _circs, 2)
+                    
+                    call_later(1.35, time_source_units_seconds, 
                     function(){
+                        self.damage_to_deal *=  (magic_damage / 5)
                         self.target.take_dmg(floor(damage_to_deal), (damage_to_deal > 30))
+                        
+                        if(damage_to_deal > 55){
+                            battle.turn_particles_on(target.x, target.y, 30)
+                            battle.draw_black_overlay = 8
+                            audio_play_sound(snd_excellent, 1, 0, 1, undefined, .8, 1.1)
+                        }
                         
                         self.action = -1
                         self.target = -1
@@ -627,21 +741,22 @@ function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
                         self.sprite.change(spr_mago_idle)
                         
                         call_later(1, time_source_units_seconds,
-                        function(){self.finished_action = true})
+                        function(){self.finished_action = true; self.sprite.image_spd = 1;})
                     })
                 }
                 break
             
             case BattleActionStates.MAGIC_RELEASE:
-                if(!attacked){
-                    attacked = true
-                }
+                // n tem nada aqui pois sou meio desprovido
                 break
         }
     }
     
     heal_action = function() {
-        if(action_state == -1) action_state = BattleActionStates.HEAL_STARTING
+        if(action_state == -1){
+            action_state = BattleActionStates.HEAL_STARTING
+            use_mana(8)
+        }
             
         switch(action_state) {
             case BattleActionStates.HEAL_STARTING:
@@ -654,11 +769,15 @@ function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
             
             case BattleActionStates.HEAL_HEALING:
                 if(!healed){
-                    target.heal(magic_damage * 2)
+                    target.heal(magic_damage * 3)
+                    target.sprite.change(target.happy_sprite)
+                    
                     target.sprite.color = c_lime
                     healed = true
                     
-                    call_later(1, time_source_units_seconds, function(){
+                    call_later(2, time_source_units_seconds, function(){
+                        self.target.sprite.change(self.target.default_sprite)
+                        
                         self.action = -1
                         self.target = -1
                         self.action_state = -1
@@ -672,15 +791,46 @@ function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
         }
     }
     
+    meditate_action = function() {
+        if(action_state == -1){
+            action_state = BattleActionStates.CHARGE_ANIM
+        }
+            
+        switch(action_state) {
+            case BattleActionStates.CHARGE_ANIM:
+                if(!started_charging){
+                    call_later(1, time_source_units_seconds,
+                    function(){
+                        self.use_mana(-20)
+                        
+                        self.action = -1
+                        self.target = -1
+                        self.action_state = -1
+                        
+                        self.started_charging = false
+                        
+                        call_later(2, time_source_units_seconds,
+                        function(){self.finished_action = true})
+                    }) 
+                    started_charging = true
+                }
+                break;
+        }
+    }
+    
     update = function(){
         if(action == BattleActions.MAGIC){
             if(action_state == BattleActionStates.MAGIC_CHARGING){
-                sprite.xscale = wave(1.1 + (damage_to_deal / 20), 1, 1)
-                sprite.yscale = wave(1, 1.1 + (damage_to_deal / 20), 1)
+                sprite.xscale = wave(1.1 + (damage_to_deal / 30), 1, 1)
+                sprite.yscale = wave(1, 1.1 + (damage_to_deal / 30), 1)
                 
-                var _shake = .5 + (damage_to_deal / 30)
+                var _shake = .5 + (damage_to_deal / 25)
                 offset.x = irandom_range(-_shake, _shake)
                 offset.y = irandom_range(-_shake, _shake)
+                
+                var _sproff = wave(-10, 10, 4, damage_to_deal / 5)
+                sprite.offset.x = _sproff
+                sprite.xscale = (_sproff != 0) ? sign(_sproff) : 1
                 
             }else{
                 sprite.xscale = 1
@@ -690,24 +840,41 @@ function Mago(_vida, _atk, _mag) : BattleUnit("", noone) constructor {
             }
         }
     }
+    
+    draw = function(){
+        sprite.animate(2)
+    }
 }
 
-function Dino() : BattleEnemy(250, noone) constructor {
-    name = "Dino"
-	sprite = new Sprite(spr_dino_idle)
+function Dino() : BattleEnemy("Dino", noone) constructor {
+    hp = 200
+    max_hp = 200
+    
+	sprite = new Sprite(spr_dino_move)
+    sprite.image_spd = .2
 	
-	attack_anim_seconds = 1.5
+    attack_damage = 12
+    
+	attack_anim_seconds = 1
 	
+    my_delay = .25 * irandom(1_000)
+    
 	attack_state = function() {
         if(action_state == -1) action_state = BattleActionStates.ATTACK_WALKING
-        if(target == -1) target = battle.units[irandom(array_length(battle.units) - 1)]
+        if(target == -1) find_alive_target()
         
         var _targetx, _targety, _dir, _dist
         
         switch (action_state) {
             case BattleActionStates.ATTACK_WALKING:
-                var _arrived = go_to_point(target.x + 32, target.y, 3)
+                var _arrived = go_to_point(target.x + 32, target.y, 1)
+                
+                self.sprite.image_spd = 2
+                
                 if(_arrived) {
+                    sprite.image_spd = 0
+                    sprite.change(spr_dino_attack)
+                    sprite.image_ind = 0
                     action_state = BattleActionStates.ATTACK_CHARGING
                     
                     // adicionando animação de ataque
@@ -716,13 +883,13 @@ function Dino() : BattleEnemy(250, noone) constructor {
                     var _back_distance = 16 
                     
                     root.anim.add(
-                        new Animation(self.sprite, "yscale", 1, .8, _duration * (2 / 3))
+                        new Animation(self.sprite, "yscale", 1, .7, _duration * (2 / 3))
 							.ease(ease_out_sine)
                             .tag(_tag)
                     )
 					
 					root.anim.add(
-                        new Animation(self.sprite, "yscale", .8, 1, _duration * (1 / 3))
+                        new Animation(self.sprite, "yscale", .7, 1, _duration * (1 / 3))
 							.delay(_duration * (2 / 3))
 							.ease(ease_out_sine)
                             .tag(_tag)
@@ -732,12 +899,14 @@ function Dino() : BattleEnemy(250, noone) constructor {
                         new Animation(self, "draw_x", draw_x, draw_x + _back_distance, _duration * (2 / 3))
 							.ease(ease_out_sine)
                             .tag(_tag)
+                            .complete_callback(function(_){_.sprite.image_ind = 1})
+                            .callback_args(self)
                     )
                     
                     root.anim.add(
                         new Animation(self, "draw_x", draw_x + _back_distance, draw_x - 20, _duration * (1 / 3))
 							.delay(_duration * (2 / 3))
-                            .ease(ease_out_quart)
+                            .ease(ease_out_cubic)
                             .tag(_tag)
                     )
                     
@@ -748,12 +917,17 @@ function Dino() : BattleEnemy(250, noone) constructor {
                 if(!attacked){
                     attacked = true
                     target.dodging = true
-                    call_later(attack_anim_seconds - .3, time_source_units_seconds, 
+                    call_later(attack_anim_seconds - .2, time_source_units_seconds, 
                     function(){
+                        self.sprite.image_spd = 2
+                        self.sprite.xscale = -1
+                        self.sprite.change(spr_dino_move)
+                        
                         if(!target.jumping){
-                            var _damage = self.attack_damage * 4 // diminuindo dano se o parry der certo
+                            var _damage = self.attack_damage * 3 // diminuindo dano se o parry der certo
                             self.target.take_dmg(_damage)
                         }
+                        
                         self.target.dodging = false
                         self.target.jumping = false
                         self.action_state = BattleActionStates.ATTACK_LEAVING
@@ -764,6 +938,9 @@ function Dino() : BattleEnemy(250, noone) constructor {
             case BattleActionStates.ATTACK_LEAVING:
                 var _arrived = go_to_point(x, y, 2)
                 if(_arrived){
+                    sprite.image_spd = 1
+                    sprite.xscale = 1
+                    
                     target = -1
                     action_state = -1
                     
@@ -774,72 +951,388 @@ function Dino() : BattleEnemy(250, noone) constructor {
                 break
         }
     }
+    
+    update = function(){
+        sprite.animate(4)
+        if(battle.state != BattleStates.STARTING and action_state == -1){
+            sprite.offset.x = wave(-4, 4, 2, my_delay)
+        }
+        
+        if(dead){
+            return
+        }
+        
+        if(battle.state == BattleStates.ENEMY_ATTACKING and battle.enemies[battle.current_enemy] == self){
+            
+            switch(action){
+                case BattleActions.ATTACK: attack_state(); break;
+            }
+        }
+        
+        if(hp > max_hp) hp = max_hp
+        if(mana > max_mana) mana = max_mana
+    }
 }
 
+function Peixe() : BattleEnemy("Peixe 'Voador'", noone) constructor {
+    
+    hp = 130
+    max_hp = 130
+    
+	sprite = new Sprite(spr_peixe_idle)
+	
+    magic_damage = 8
+    
+    default_sprite = spr_peixe_idle
+    hurt_sprite = spr_peixe_hit
+	
+	attack_state = function() {
+        if(action_state == -1) action_state = BattleActionStates.ATTACK_WALKING
+        if(target == -1) find_alive_target()
+        
+        var _targetx, _targety, _dir, _dist
+        
+        switch (action_state) {
+            case BattleActionStates.ATTACK_WALKING:
+                var _arrived = go_to_point(100, 70, 1)
+                if(_arrived) {
+                    action_state = BattleActionStates.ATTACK_CHARGING
+                    
+                    // adicionando animação de ataque
+					var _tag = $"enemy:{entity_id}_attack_anim"
+                    var _duration = attack_anim_seconds
+                    
+                }
+                break
+            
+            case BattleActionStates.ATTACK_CHARGING:
+                if(!attacked){
+                    attacked = true
+                    target.dodging = true
+                    sprite.change(spr_peixe_ataque)
+                    
+                    create_beam(draw_x, draw_y - 8, point_direction(draw_x, draw_y, target.x, target.y), 12, 5)
+                    
+                    call_later(1, time_source_units_seconds, 
+                    function(){
+                        if(!target.jumping){
+                            var _damage = self.magic_damage * 4
+                            self.target.take_dmg(_damage)
+                        }
+                        self.target.dodging = false
+                        self.target.jumping = false
+                        
+                        call_later(1, time_source_units_seconds,
+                        function(){self.action_state = BattleActionStates.ATTACK_LEAVING})
+                    })
+                }
+                break
+            
+            case BattleActionStates.ATTACK_LEAVING:
+                var _arrived = go_to_point(x, y, 2)
+                if(_arrived){
+                    sprite.change(spr_peixe_idle)
+                    
+                    target = -1
+                    action_state = -1
+                    
+                    attacked = false
+                    finished_action = true
+                }
+                break
+        }
+    }
+    
+    update = function() {
+        
+        sprite.animate(2)
+        offset.y = wave(-4, -10, 3, .2 * entity_id)
+        
+        if(dead){
+            return
+        }
+        
+        if(battle.state == BattleStates.ENEMY_ATTACKING and battle.enemies[battle.current_enemy] == self){
+            
+            switch(action){
+                case BattleActions.ATTACK: attack_state(); break;
+            }
+        }
+        
+        if(hp > max_hp) hp = max_hp
+        if(mana > max_mana) mana = max_mana
+    }
+}
+
+function Cavaleiro() : BattleEnemy("O Cavaleiro", noone) constructor {
+    
+    hp = 40
+    max_hp = 400
+    
+    sprite = new Sprite(spr_arm_peito_idle)
+    sprite.offset.y = -1
+    sprite.xscale = 1.5
+    sprite.yscale = 1.5
+    
+    cabeca = -1
+    pernas = -1
+    
+    offset.y = -16
+    offset.x = -4
+    
+    action = -1
+    
+    die = function() {
+        dead = true
+    }
+    
+    main_update = function() {
+        if(!dead){
+            // voltando a cor da sprite
+            var _r = color_get_red(sprite.color)
+            var _g = color_get_green(sprite.color)
+            var _b = color_get_blue(sprite.color)
+            
+            _r = approach(_r, 255, 3)
+            _g = approach(_g, 255, 3)
+            _b = approach(_b, 255, 3)
+            
+            sprite.color = make_color_rgb(_r, _g, _b)
+        }
+    }
+    
+    update = function() {
+        finished_action = true
+        
+        for(var i = 0; i < array_length(battle.enemies); i++){
+            var _cur_enemy = battle.enemies[i]
+            if(is_instanceof(_cur_enemy, CavaleiroCabeca)){
+                cabeca = _cur_enemy
+                continue
+            }
+            
+            if(is_instanceof(_cur_enemy, CavaleiroPernas)){
+                pernas = _cur_enemy
+                continue
+            }
+        }
+        
+        if(cabeca != -1 and pernas != -1){
+            cabeca.x = x
+            cabeca.y = y - 32
+            
+            cabeca.draw_x = cabeca.x
+            cabeca.draw_y = cabeca.y
+            
+            pernas.x = x
+            pernas.y = y + 32
+            
+            pernas.draw_x = pernas.x
+            pernas.draw_y = pernas.y
+        }
+        
+    }
+    
+    main_draw = function() {
+        
+        // pernocas
+        pernas.sprite.offset.y = 50
+        
+        pernas.sprite.xscale = -1
+        pernas.sprite.draw(draw_x + offset.x - 12 - wave(0, 2, 5), draw_y + offset.y)
+        
+        pernas.sprite.xscale = 1
+        pernas.sprite.draw(draw_x + offset.x + 12 + wave(0, 2, 5), draw_y + offset.y)
+        pernas.sprite.animate(2)
+        
+        // corpo
+        sprite.rotation = wave(-1, 3, 7)
+        sprite.offset.y = 8 + wave(0, 2, 4)
+        sprite.draw(draw_x + offset.x, draw_y + offset.y)
+        sprite.animate(2)
+        
+        // cabeça
+        cabeca.sprite.rotation = wave(-2, 6, 7)
+        cabeca.sprite.offset.y = wave(0, 2, 4)
+        
+        cabeca.sprite.draw(draw_x + offset.x, draw_y + offset.y)
+        cabeca.sprite.animate(1)
+    }
+    
+}
+
+function CavaleiroCabeca() : BattleEnemy("O Cavaleiro", noone) constructor {
+    hp = 30
+    max_hp = 300
+    
+    sprite = new Sprite(spr_arm_cabe_a_idle)
+    
+    finished_action = true 
+    
+    die = function() {
+        dead = true
+        battle.redefine_targets()
+        sprite.offset.x = 1
+    }
+    
+    main_update = function() {
+        if(!dead){
+            // voltando a cor da sprite
+            var _r = color_get_red(sprite.color)
+            var _g = color_get_green(sprite.color)
+            var _b = color_get_blue(sprite.color)
+            
+            _r = approach(_r, 255, 3)
+            _g = approach(_g, 255, 3)
+            _b = approach(_b, 255, 3)
+            
+            sprite.color = make_color_rgb(_r, _g, _b)
+        }
+    }
+    
+    update = function() {
+        finished_action = true
+    }
+    
+    main_draw = function() {
+        
+    }
+    
+    draw = function() {
+        
+    }
+}
+
+function CavaleiroPernas() : BattleEnemy("O Cavaleiro", noone) constructor {
+    hp = 20
+    max_hp = 200
+    
+    sprite = new Sprite(spr_arm_bota_idle)
+    
+    finished_action = true
+    
+    die = function() {
+        dead = true
+        battle.redefine_targets()
+        sprite.offset.x = 1
+    }
+    
+    main_update = function() {
+        if(!dead){
+            // voltando a cor da sprite
+            var _r = color_get_red(sprite.color)
+            var _g = color_get_green(sprite.color)
+            var _b = color_get_blue(sprite.color)
+            
+            _r = approach(_r, 255, 3)
+            _g = approach(_g, 255, 3)
+            _b = approach(_b, 255, 3)
+            
+            sprite.color = make_color_rgb(_r, _g, _b)
+        }
+    }
+    
+    update = function() { 
+        finished_action = true
+    }
+    
+    main_draw = function() {
+        
+    }
+    
+    draw = function() {
+        
+    }
+}
+
+
+
+// OUTROS
 function UnitCard(_unit_link) constructor {
 	static card_id = 0
 	card_id++
 	
 	link = _unit_link
 	anim_tag = $"unit_card:{card_id}_anim"
+    
 	// top-left
-	x = 20 + (48 * card_id)
-	y = -100
-	
 	width = 32
 	height = 48
+    
+    x = 0
+	y = 128 - height / 3
+    
+    resumo = false
 	
-	raised = false
+	//root.anim.add(
+		//new Animation(self, "y", 128, 128 - height / 3, 2)
+            //.delay((root.first_battle) ? 5 : 1)
+			//.ease(ease_out_cubic)
+			//.tag(anim_tag)
+	//)
+    
+    offset = {
+        x : 0,
+        y : 0
+    }
 	
-	root.anim.add(
-		new Animation(self, "y", 128, 128 - height / 3, 2)
-			.ease(ease_out_cubic)
-			.tag(anim_tag)
-	)
-	
-	raise = function(){
-		if(raised) {
-			return	
-		}
-		
-		root.anim.cancel(anim_tag)
-		root.anim.add(
-			new Animation(self, "y", y, y - 32, 1)
-				.ease(ease_out_cubic)
-				.tag(anim_tag)
-		)
-		raised = true
-	}
-	
-	lower = function(){
-		if(!raised) {
-			return	
-		}
-		
-		root.anim.cancel(anim_tag)
-		root.anim.add(
-			new Animation(self, "y", y, y + 32, 1)
-				.ease(ease_out_cubic)
-				.tag(anim_tag)
-		)
-		raised = false
-	}
-	
-	draw = function() {
-		var _background_color = #081820
-		var _text_color = #E0F8D0
+	draw = function(_hp_diff = 0, _mana_diff = 0, _complementary_hp_string = "", _complementary_mana_string = "") {
+        if(resumo) {
+            _complementary_hp_string = ""
+            _complementary_mana_string = ""
+        }
+        
+        var _final_hp = clamp(link.hp + _hp_diff, -9999, link.max_hp)
+        var _final_mana = clamp(link.mana - _mana_diff, -9999, link.max_mana)
+        
+		var _background_color = #E0F8D0
+        
+		var _hp_text_color = (_final_hp == link.hp) ? #081820 : #346856
+		var _mana_text_color = (_final_mana == link.mana) ? #081820 : #346856
 		
 		// desenhando fundo com cabecinha redonda :/
 		draw_set_color(_background_color)
 		
 		// a cabeça pega 1/3 da altura e o resto fica pro corpo
-		draw_rectangle(x, y, x + width, y + height, false)
+		draw_rectangle(x + offset.x, y + offset.y, x + width + offset.x, y + height + offset.y, false)
 		
 		draw_set_color(c_white)
 		
-		// desenhando infos
-		var _life_text = scribble(link.hp)
-			.starting_format("fnt_default", _text_color)
+		
+        // nome
+		var _name_text = scribble(link.name)
+			.starting_format("fnt_default", #081820)
+            .scale(.25)
+            .padding(2, 2, 2, 2)
+        
+        _name_text.draw(x + offset.x, y + offset.y)
+        draw_sprite(spr_heart, 0, x + offset.x + 2, y + offset.y + 8)
+        
+        // vida
+		var _life_text = scribble($"{round(_final_hp)}{_complementary_hp_string}")
+			.starting_format("fnt_default", _hp_text_color)
+            .scale(.25)
+            .padding(2, 2, 2, 2)
+        
+        if(resumo) {
+            _life_text.align(2, 0)
+            _life_text.draw(x + width + offset.x - 5, y + offset.y)
+            draw_sprite(spr_heart, 0, x + width + offset.x - 6, y + offset.y + 2)
+        } else {
+            _life_text.align(0, 0)
+            _life_text.draw(x + offset.x + 7, y + offset.y + 6)
+            draw_sprite(spr_heart, 0, x + offset.x + 2, y + offset.y + 8)
+        }
+        
+        // mana
+		var _mana_text = scribble($"{_complementary_mana_string}{round(_final_mana)}")
+			.starting_format("fnt_default", _mana_text_color)
+            .scale(.25)
+            .align(2, 0)
+            .padding(2, 2, 2, 2)
+        
+        _mana_text.draw(x + width + offset.x - 6, y + offset.y + 12)
+        draw_sprite(spr_mana, 0, x + width + offset.x - 6, y + offset.y + 14)
 	}
 }
 
@@ -849,6 +1342,10 @@ function start_battle(_units, _enemies, _start_frames = 0, _song = msc_battle) {
 	obj_camera.control_mode = "battle"
 	
 	audio_stop_all()
+    
+    // salvando informações iniciais
+    root.prev_guerreiro_hp = root.guerreiro.hp
+    root.prev_guerreiro_mana = root.guerreiro.mana
 	
     var _inst = instance_create_depth(0, 0, -100, obj_battle)
     var _cards = [] // preencher com os cartões
@@ -874,4 +1371,10 @@ function end_battle() {
 	obj_camera.control_mode = "dungeon"
 	obj_camera.spawning = true
 	obj_player.control = true
+    
+    root.guerreiro.draw_x = -1000
+    root.mago.draw_x = -1000
+    
+    audio_stop_all()
+    audio_play_sound(msc_dungeon, 1, 1)
 }

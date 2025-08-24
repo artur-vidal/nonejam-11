@@ -1,0 +1,1 @@
+enemies = [new CavaleiroCabeca(), new Cavaleiro(), new CavaleiroPernas()]

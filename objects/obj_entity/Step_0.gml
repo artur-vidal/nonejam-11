@@ -1,1 +1,0 @@
-if(!manual_depth) depth = -y

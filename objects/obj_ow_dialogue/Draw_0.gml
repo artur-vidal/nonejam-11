@@ -7,6 +7,6 @@ var _text = scribble(text[cur_page])
     .starting_format($"{font_get_name(font)}", #e0f8d0)
     .scale(.35)
     .padding(pad, pad, pad, pad)
-    .wrap(120)
+    .wrap(160)
 
 _text.draw(_cx + round(box_x), _cy + round(box_y), typist)

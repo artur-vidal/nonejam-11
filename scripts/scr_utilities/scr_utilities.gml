@@ -97,6 +97,13 @@ function game_start() {
     room_goto(rm_game)
 }
 
+function play_wrong_sound(){
+    audio_stop_sound(snd_blip)
+    audio_play_sound(snd_blip, 1, 0, .4, undefined, .5)
+    call_later(15, time_source_units_frames, 
+    function(){audio_play_sound(snd_blip, 1, 0, .4, undefined, .3)})
+}
+
 function create_indicator(_x, _y, _val, _mini = false){
     instance_create_depth(_x, _y, -888, (_mini) ? obj_mini_number_indicator : obj_number_indicator).val = _val
 }
@@ -115,10 +122,22 @@ function create_dialogue(_text_array, _sound = snd_text_mid, _pitch_min = 1, _pi
     _box.pitch_max = _pitch_max
 }
 
-function create_transition(_dur, _on_switch = function(){}) {
-	obj_player.control = false
+function create_transition(_dur, _on_switch = function(){}, _on_end = function(){}) {
+    if(instance_exists(obj_transicao)){
+        return
+    }
+    
+    if(instance_exists(obj_player)) obj_player.control = false
 	
 	var _inst = instance_create_depth(0, 0, -999, obj_transicao)
-	_inst.duration = _dur
+	_inst.total_time = _dur
 	_inst.on_mid_activation = _on_switch
+    _inst.on_end = _on_end
+}
+
+function create_beam(_x, _y, _dir, _max_circles, _spawn_time){
+    var _inst = instance_create_depth(_x, _y, -200, obj_hyper_beam)
+    _inst.dir = _dir
+    _inst.max_circles = _max_circles
+    _inst.frame_interval = _spawn_time
 }

@@ -1,1 +1,0 @@
-draw_sprite_ext(sprite, image_ind, x, y, xscale * side, yscale, angle, c_white, alpha)

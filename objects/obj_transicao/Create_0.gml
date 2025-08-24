@@ -7,4 +7,6 @@ out = false
 
 on_mid_activation = function(){}
 
+on_end = function(){}
+
 show_debug_message("ino")

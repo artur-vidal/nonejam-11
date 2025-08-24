@@ -5,21 +5,21 @@
   "bbox_bottom":23,
   "bbox_left":0,
   "bbox_right":23,
-  "bbox_top":3,
+  "bbox_top":2,
   "collisionKind":1,
   "collisionTolerance":0,
   "DynamicTexturePage":false,
   "edgeFiltering":false,
   "For3D":false,
   "frames":[
-    {"$GMSpriteFrame":"","%Name":"5816e36a-14aa-4dab-8a83-f62cc3c45d74","name":"5816e36a-14aa-4dab-8a83-f62cc3c45d74","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
+    {"$GMSpriteFrame":"","%Name":"f31909be-eb4e-43c1-8a26-9222b28cb794","name":"f31909be-eb4e-43c1-8a26-9222b28cb794","resourceType":"GMSpriteFrame","resourceVersion":"2.0",},
   ],
   "gridX":0,
   "gridY":0,
   "height":24,
   "HTile":false,
   "layers":[
-    {"$GMImageLayer":"","%Name":"20084c82-181b-484d-9854-71370dfd2b60","blendMode":0,"displayName":"default","isLocked":false,"name":"20084c82-181b-484d-9854-71370dfd2b60","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
+    {"$GMImageLayer":"","%Name":"417e877d-e892-49bd-ac09-2aa868c769ea","blendMode":0,"displayName":"default","isLocked":false,"name":"417e877d-e892-49bd-ac09-2aa868c769ea","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
   ],
   "name":"spr_guerreiro_hit",
   "nineSlice":null,
@@ -71,8 +71,8 @@
     "tracks":[
       {"$GMSpriteFramesTrack":"","builtinName":0,"events":[],"inheritsTrackColour":true,"interpolation":1,"isCreationTrack":false,"keyframes":{"$KeyframeStore<SpriteFrameKeyframe>":"","Keyframes":[
             {"$Keyframe<SpriteFrameKeyframe>":"","Channels":{
-                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"5816e36a-14aa-4dab-8a83-f62cc3c45d74","path":"sprites/spr_guerreiro_hit/spr_guerreiro_hit.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
-              },"Disabled":false,"id":"a69034b2-ba5e-4bef-ac03-bbbb36378896","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
+                "0":{"$SpriteFrameKeyframe":"","Id":{"name":"f31909be-eb4e-43c1-8a26-9222b28cb794","path":"sprites/spr_guerreiro_hit/spr_guerreiro_hit.yy",},"resourceType":"SpriteFrameKeyframe","resourceVersion":"2.0",},
+              },"Disabled":false,"id":"6aa1d390-0106-42b9-97a2-72cc8901ab20","IsCreationKey":false,"Key":0.0,"Length":1.0,"resourceType":"Keyframe<SpriteFrameKeyframe>","resourceVersion":"2.0","Stretch":false,},
           ],"resourceType":"KeyframeStore<SpriteFrameKeyframe>","resourceVersion":"2.0",},"modifiers":[],"name":"frames","resourceType":"GMSpriteFramesTrack","resourceVersion":"2.0","spriteId":null,"trackColour":0,"tracks":[],"traits":0,},
     ],
     "visibleRange":null,

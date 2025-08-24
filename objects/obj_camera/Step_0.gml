@@ -1,6 +1,8 @@
 move()
 camera_set_view_size(view_camera[0], width, height)
 
+shake_time = approach(shake_time, 0, 1)
+
 player = instance_find(obj_player, 0)
 if(!instance_exists(player)){
 	exit

@@ -14,6 +14,9 @@ spawning = true
 
 control_mode = "dungeon"
 
+shake_time = 0
+shake_intensity = 5
+
 move = function(){
 	if(control_mode = "dungeon"){
 		var _dir = point_direction(cx, cy, target_x, target_y)
@@ -32,5 +35,10 @@ move = function(){
 		cy = 0
 	}
 	
-	camera_set_view_pos(view_camera[0], cx, cy)		
+    var _shake = (shake_time > 0) ? irandom_range(-shake_intensity, shake_intensity) : 0
+	camera_set_view_pos(view_camera[0], cx + _shake, cy)		
+}
+
+turn_shake_on = function(_frame_duration, _intensity = shake_intensity) {
+    shake_time = _frame_duration
 }

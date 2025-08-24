@@ -8,6 +8,7 @@ pad = 3
 
 player = instance_find(obj_player, 0)
 player.control = false
+obj_follow.following = false
 
 typist = scribble_typist()
 typist.in(0, 0)
@@ -26,8 +27,8 @@ box_y = 128
 
 appearing = true
 root.anim.add(
-    new Animation(id, "box_y", box_y, box_y - box_height, 1.5)
-        .complete_callback(function(_){_.typist.in(.2, 0); _.appearing = false;})
+    new Animation(id, "box_y", box_y, box_y - box_height, 1)
+        .complete_callback(function(_){_.typist.in(.3, 0); _.appearing = false;})
         .callback_args(id)
 )
 
@@ -43,5 +44,5 @@ pass_text = function(){
 		return
     }
 	
-    typist.in(.2, 0)  
+    typist.in(.3, 0)
 }

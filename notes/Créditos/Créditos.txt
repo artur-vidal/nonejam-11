@@ -6,8 +6,12 @@
 - DoLater por JujuAdams
 (https://github.com/JujuAdams/DoLater)
 
+### ARTE
+- bktGlitch por odditica (shader) https://odditica.itch.io/bktglitch
+
 ### ÁUDIO
-- Som de parry - nekoninja (Pixabay)
+- Música do menu inicial - Alexander Nakarada https://youtu.be/7_cwKd81z7Q?si=BgmtEhHebGswD9lq
+- Som de block - nekoninja (Pixabay)
 https://pixabay.com/sound-effects/shield-guard-6963/
 
 ### FONTES (texto)

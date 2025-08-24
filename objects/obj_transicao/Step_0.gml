@@ -13,5 +13,5 @@ if(!out){
 
 cur_alpha = cur_time / total_time
 if(cur_alpha = approach(cur_alpha, round_digits(cur_alpha, 1), .1)) {
-    audio_play_sound(snd_step, 1, 0, 1, undefined, 1.7)
+    audio_play_sound(snd_step, 1, 0, .6, undefined, 1.7)
 }

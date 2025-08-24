@@ -1,4 +1,4 @@
 texto = [
-	"Você achou um item!",
+	"Voce achou um item!",
 	"Legal."
 ]

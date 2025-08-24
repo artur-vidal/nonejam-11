@@ -9,8 +9,8 @@
   "name":"obj_number_indicator",
   "overriddenProperties":[],
   "parent":{
-    "name":"Objects",
-    "path":"folders/Objects.yy",
+    "name":"Battle",
+    "path":"folders/Battle.yy",
   },
   "parentObjectId":null,
   "persistent":false,

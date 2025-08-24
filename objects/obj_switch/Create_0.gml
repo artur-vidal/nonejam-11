@@ -1,0 +1,2 @@
+door = noone
+used = false
