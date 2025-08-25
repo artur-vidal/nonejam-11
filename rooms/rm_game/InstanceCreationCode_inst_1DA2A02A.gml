@@ -9,4 +9,4 @@ texto = [
     "Voce agora pode usar as acoes CONCENTRAR e CURAR."
 ]
 
-trigger_link = inst_72D8CF51
+trigger_link = [inst_72D8CF51, inst_501A94A7]

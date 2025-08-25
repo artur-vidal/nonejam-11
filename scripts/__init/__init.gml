@@ -6,6 +6,8 @@ window_center()
 
 audio_master_gain(.5)
 
+randomize()
+
 enum Direction {
     RIGHT,
     UP,

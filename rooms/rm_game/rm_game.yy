@@ -94,6 +94,7 @@
     {"name":"inst_579F816A","path":"rooms/rm_game/rm_game.yy",},
     {"name":"inst_3C74E633","path":"rooms/rm_game/rm_game.yy",},
     {"name":"inst_72D8CF51","path":"rooms/rm_game/rm_game.yy",},
+    {"name":"inst_5E6C9357","path":"rooms/rm_game/rm_game.yy",},
   ],
   "isDnd":false,
   "layers":[
@@ -132,6 +133,7 @@
         {"$GMRInstance":"v2","%Name":"inst_910FAD8","colour":4294967295,"frozen":false,"hasCreationCode":true,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_910FAD8","objectId":{"name":"obj_miniature","path":"objects/obj_miniature/obj_miniature.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":592.0,"y":464.0,},
         {"$GMRInstance":"v2","%Name":"inst_3C74E633","colour":4294967295,"frozen":false,"hasCreationCode":true,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_3C74E633","objectId":{"name":"obj_miniature","path":"objects/obj_miniature/obj_miniature.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"x":560.0,"y":48.0,},
         {"$GMRInstance":"v2","%Name":"inst_72D8CF51","colour":4294967295,"frozen":false,"hasCreationCode":true,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_72D8CF51","objectId":{"name":"obj_dialogue_trigger","path":"objects/obj_dialogue_trigger/obj_dialogue_trigger.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":2.0,"scaleY":1.0,"x":544.0,"y":96.0,},
+        {"$GMRInstance":"v2","%Name":"inst_5E6C9357","colour":4294967295,"frozen":false,"hasCreationCode":true,"ignore":false,"imageIndex":0,"imageSpeed":1.0,"inheritCode":false,"inheritedItemId":null,"inheritItemSettings":false,"isDnd":false,"name":"inst_5E6C9357","objectId":{"name":"obj_battle_trigger","path":"objects/obj_battle_trigger/obj_battle_trigger.yy",},"properties":[],"resourceType":"GMRInstance","resourceVersion":"2.0","rotation":0.0,"scaleX":2.0,"scaleY":1.0,"x":704.0,"y":1024.0,},
       ],"layers":[],"name":"elementos_cenario","properties":[],"resourceType":"GMRInstanceLayer","resourceVersion":"2.0","userdefinedDepth":false,"visible":true,},
     {"$GMRAssetLayer":"","%Name":"sprites_cenario","assets":[
         {"$GMRSpriteGraphic":"v1","%Name":"graphic_139575B","animationSpeed":1.0,"colour":4294967295,"frozen":false,"headPosition":0.0,"ignore":false,"inheritedItemId":null,"inheritItemSettings":false,"name":"graphic_139575B","resourceType":"GMRSpriteGraphic","resourceVersion":"2.0","rotation":0.0,"scaleX":1.0,"scaleY":1.0,"spriteId":{"name":"spr_tocha_lado","path":"sprites/spr_tocha_lado/spr_tocha_lado.yy",},"x":952.0,"y":864.0,},

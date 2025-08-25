@@ -1,6 +1,6 @@
 text = [
     "Meg: Olha, o cavaleiro ta ali!",
     "Gui: Ele parece bem forte. Sera que a gente consegue enfrentar ele?",
-    "Meg: Hmm... Ei, a gente abriu aquele bau la atras?",
-    "Gui: Acho que nao, quer dar uma olhada de novo?",
+    "Meg: Hmm... [delay, 500]Eu sinto que a gente deixou algo passar...",
+    "Gui: O senhor cavaleiro parece bem paciente. Talvez porque ele nao quer que saiamos daqui tao cedo. Quer descer e dar uma olhada?"
 ]

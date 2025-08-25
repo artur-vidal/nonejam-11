@@ -13,9 +13,12 @@ text = [
 on_start = function(){
     audio_stop_all()
     audio_play_sound(msc_tension_max, 1, 1)
-    obj_follow.x = obj_player.x - 16
+    
+    obj_follow.x = (obj_player.x > 560) ? obj_player.x - 16 : obj_player.x + 16
+    
     obj_follow.y = obj_player.y
     obj_follow.sprite.change(spr_mago_mini_tras)
+    obj_follow.sprite.image_ind = 0
 }
 
 on_dialogue_end = function() {

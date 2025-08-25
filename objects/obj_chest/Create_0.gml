@@ -1,14 +1,15 @@
 event_inherited()
 
 open = false
-trigger_link = noone
+trigger_links = -1
 
 action = function() {
 	describe()
     array_push(root.guerreiro.available_actions, BattleActions.CHARGE)
     array_push(root.mago.available_actions, BattleActions.HEAL)
+    
     if(trigger_link != noone) {
-        instance_destroy(trigger_link)
+        array_foreach(trigger_link, function(_el, _ind){instance_destroy(_el)})
     }
         
     if(!open){

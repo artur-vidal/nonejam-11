@@ -3,6 +3,7 @@ obj_camera.cy = 0
 
 units = []
 enemies = []
+starting_enemies = []
 cards = []
 
 ylayouts = [
@@ -130,8 +131,10 @@ redefine_targets = function(){
 // resetando batalha
 reset_battle = function(){
     
+    audio_stop_all()
     audio_sound_gain(music, 1, 0)
     audio_sound_pitch(music, 1)
+    
     continue_seconds = 21 * 60
     continue_text_timer = 15
     continue_alpha = 0
@@ -151,9 +154,10 @@ reset_battle = function(){
         units[i].turns_to_revive = 0
     }
     
-    // curando todos os inimigos
-    for(var i = 0; i < array_length(enemies); i++){
-        enemies[i].hp = enemies[i].max_hp
+    // resetando todos os inimigos
+    array_delete(enemies, 0, array_length(enemies))
+    for(var i = 0; i < array_length(starting_enemies); i++){
+        array_push(enemies, variable_clone(starting_enemies[i]))
     }
     
     state = BattleStates.STARTING
@@ -472,6 +476,7 @@ state_enemy_attacks = function() {
                 return 
             }
             
+            set_current_unit()
             state = BattleStates.PLAYER_TURN
         }
     }
@@ -506,7 +511,7 @@ state_end = function(){
     		call_later(5, time_source_units_seconds,
     		function(){
     			create_transition(120, function(){
-    				end_battle()
+    				end_battle((on_end == function(){}))
     			})	
     		})
     		ending = true
