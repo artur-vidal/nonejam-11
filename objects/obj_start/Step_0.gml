@@ -94,7 +94,7 @@ switch(state){
                 case 3:
                     show_message("Não foi possível criar um tutorial, então aqui está um guia de como jogar.")
                     show_message("Controles:\nAndar: setas\nConfirmar/Interagir/Pular/Atacar: Z\nCancelar/Bloquear: X")
-                    show_message("Quando estiver em batalha, o guerreiro e o mago tem ataques diferentes.\nNo ataque do guerreiro, você tem que apertar Z quando for acertar o inimigo.\nNo ataque do mago, ESMAGUE seu teclado com teclas! \"tipo AHSIHGDFOISADHFIASDHFIUHASDOIFUASHOFIUASDFL\"")
+                    show_message("Quando estiver em batalha, o guerreiro e o mago tem ataques diferentes.\nNo ataque do guerreiro, você tem que apertar Z quando for acertar o inimigo.\nNo ataque do mago, ESMAGUE seu teclado com teclas! \"tipo AHSIHGDFOISADHFIASDHFIUHASDOIFUASHOFIUASDFL\"\n\nAdendo: o Guerreiro não recupera magia.")
                     show_message("Por fim, quando os inimigos atacam, você pode esquivar com Z, ou bloquear com X e reduzir o dano.\nSe bloquear no momento exato, você faz um parry!")
                     show_message("É isso. Não deu tempo de colocar essas informações no jogo, então sinta-se livre para ler novamente.")
                     break
