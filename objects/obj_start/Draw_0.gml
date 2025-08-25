@@ -38,7 +38,7 @@ switch(state){
             
             var _off = (i == pos) ? 8 : 0
             var _wave_effect = (i == pos) ? "[wave]" : ""
-            var _alpha = (i == 0) ? title_alpha / 2 : title_alpha
+            var _alpha = (i == root.beat_game) ? title_alpha / 2 : title_alpha
             
             var _cur_option = scribble(_wave_effect + options[i])
                 .starting_format("fnt_menu", c_white)
@@ -50,6 +50,22 @@ switch(state){
         
         // resetando
         draw_set_color(c_white)
+        scribble_anim_reset()
+        break
     
-    scribble_anim_reset()
+    case 2:
+        draw_sprite_ext(spr_cabeca, 0, room_width / 2, room_height / 2, 3, 3, 0, c_white,  1)
+    
+        // titulo
+        scribble_anim_wave(1, 12, .03)
+        var _title = scribble($"[wave]{title_text}")
+            .starting_format("fnt_default", #e0f8d0)
+            .blend(c_white, 1)
+            .align(1, 2)
+            .padding(10, 10, 10, 10)
+        
+        _title.draw(room_width  / 2, room_height - 10)
+        break
+    
+    
 } 

@@ -1,3 +1,6 @@
+obj_camera.cx = 0
+obj_camera.cy = 0
+
 units = []
 enemies = []
 cards = []
@@ -13,10 +16,19 @@ max_entities = 4 // maximo de entidades de cada lado
 
 music = msc_battle
 
+continue_seconds = 21 * 60
+continue_text_timer = 15
+continue_alpha = 0
+continuing = false
+
 // timer pra desenhar tela preta na frente
 draw_black_overlay = 0
 black_overlay = surface_create(320, 240)
 black_overlay_alpha = 1
+
+on_end = function() {
+    audio_play_sound(msc_dungeon, 1, 1)
+}
 
 #region Partículas
 
@@ -117,6 +129,13 @@ redefine_targets = function(){
 
 // resetando batalha
 reset_battle = function(){
+    
+    audio_sound_gain(music, 1, 0)
+    audio_sound_pitch(music, 1)
+    continue_seconds = 21 * 60
+    continue_text_timer = 15
+    continue_alpha = 0
+    continuing = false
     
     // voltando as units ao estado inicial
     root.guerreiro.hp = root.prev_guerreiro_hp
@@ -437,6 +456,8 @@ state_enemy_attacks = function() {
             // resetando todas as ações
             for(var i = 0; i < array_length(enemies); i++){
                 enemies[i].finished_action = false
+                enemies[i].action_state = -1
+                enemies[i].target = -1
             }
             
             // indo pra game over se todas as units tiverem morrido
@@ -457,44 +478,100 @@ state_enemy_attacks = function() {
 }
 
 state_end = function(){
+    var _is_knight = array_length(enemies) == 3 and is_instanceof(enemies[1], Cavaleiro)
+    
 	if(!ending){
-        audio_stop_all()
-        audio_play_sound(msc_victory, 1, 0)
         
-		show_debug_message("acabano")
-		call_later(5, time_source_units_seconds,
-		function(){
-			create_transition(120, function(){
-				end_battle()
-			})	
-		})
-		ending = true
+        if(_is_knight){
+            root.beat_game = true
+            audio_sound_gain(msc_final_boss_loop, 0, 3)
+            
+                
+            root.anim.add(
+                new Animation(obj_camera, "cx", obj_camera.cx, obj_camera.cx + 35, 3)
+            )
+            
+            call_later(4, time_source_units_seconds, function(){
+                if(!units[0].dead) units[0].sprite.change(units[0].happy_sprite)
+                if(!units[1].dead) units[1].sprite.change(units[1].happy_sprite)
+                instance_create_depth(0, 0, 0, obj_end_sequence)
+            })
+            
+            ending = true
+        } else {
+            audio_stop_all()
+            audio_play_sound(msc_victory, 1, 0)
+            
+    		show_debug_message("acabano")
+    		call_later(5, time_source_units_seconds,
+    		function(){
+    			create_transition(120, function(){
+    				end_battle()
+    			})	
+    		})
+    		ending = true
+        }
 	}
     
-    if(units[0].dead){
-        units[0].dead = false
-        units[0].finished_action = false
-        units[0].heal(units[1].max_hp * .5)
-    }
-    if(units[0].go_to_point(60, 80, 1)){
-        units[0].sprite.change(spr_guerreiro_win)
-    }
-    
-    if(units[1].dead){
-        units[1].dead = false
-        units[1].finished_action = false
-        units[1].heal(units[1].max_hp * .5)
-    }
-    
-    if(array_length(units) > 1 and !units[1].dead){
-        if(units[1].go_to_point(100, 80, 1)){
-            units[1].sprite.change(spr_mago_win)
+    if(_is_knight){
+        
+    } else {
+        
+        if(units[0].dead){
+            units[0].dead = false
+            units[0].finished_action = false
+            units[0].heal(units[1].max_hp * .5)
+            units[0].sprite.change(units[0].happy_sprite)
+        }
+        if(units[0].go_to_point(60, 80, 1)){
+            units[0].sprite.change(spr_guerreiro_win)
+        }
+        
+        if(units[1].dead){
+            units[1].dead = false
+            units[1].finished_action = false
+            units[1].heal(units[1].max_hp * .5)
+            units[1].sprite.change(units[1].happy_sprite)
+        }
+        
+        if(array_length(units) > 1 and !units[1].dead){
+            if(units[1].go_to_point(100, 80, 1)){
+                units[1].sprite.change(spr_mago_win)
+            }
         }
     }
 }
 
 state_game_over = function() {
-    reset_battle()
+    if(!continuing){
+        audio_play_sound(msc_gameover, 1, 0)
+        
+        audio_sound_gain(music, .3, 2000)
+        audio_sound_pitch(music, .8)
+        continuing = true
+    }
+    
+    continue_alpha = approach(continue_alpha, .8, 0.005)
+    
+    continue_text_timer = approach(continue_text_timer, 0, 1)
+    continue_seconds--
+    
+    if(continue_seconds % 60 == 0) {
+        continue_text_timer = 10
+        
+        var _pitch = ((continue_seconds / 60) % 2 == 0) ? 1.1 : 0.8
+        audio_play_sound(snd_tick, 1, 0, .6, undefined, _pitch)
+    }
+    
+    if(keyboard_check_pressed(ord("Z"))) {
+        reset_battle()
+    }
+    
+    if(continue_seconds <= 0) {
+        audio_sound_gain(music, 1, 0)
+        audio_sound_pitch(music, 1)
+        game_restart()
+    }
 }
 
 state = BattleStates.STARTING

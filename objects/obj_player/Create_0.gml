@@ -4,7 +4,7 @@ max_vel = 1
 
 tile_size = 16
 
-control = true
+control = false
 
 sprite = new Sprite(spr_guerreiro_mini_frente)
 

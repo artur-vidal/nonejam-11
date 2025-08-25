@@ -29,10 +29,6 @@ move = function(){
 			cx = target_x
 			cy = target_y
 		}
-	
-	} else if(control_mode = "battle") {
-		cx = 0
-		cy = 0
 	}
 	
     var _shake = (shake_time > 0) ? irandom_range(-shake_intensity, shake_intensity) : 0

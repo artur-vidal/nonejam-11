@@ -27,7 +27,7 @@
   "origin":7,
   "parent":{
     "name":"Dino",
-    "path":"folders/Sprites/Dino.yy",
+    "path":"folders/Sprites/Inimigos/Dino.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

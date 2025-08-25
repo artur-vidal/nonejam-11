@@ -37,17 +37,14 @@ enum BattleBossActions {
 }
 
 enum BattleBossActionStates {
-    TACKLE_PREP,
-    TACKLE_CHARGE,
-    TACKLE_ATTACK,
-    TACKLE_LEAVE,
     CHARGE_ANIM,
     JUMP_PREP,
     JUMP_JUMP,
     JUMP_LAND,
     JUMP_LEAVE,
     BEAM_PREP,
-    BEAM_ATTACK
+    BEAM_ATTACK,
+    BEAM_LEAVING
 }
 
 enum BattleSelectionModes {
@@ -114,13 +111,19 @@ function BattleEntity(_name, _sprite) constructor{
     time_with_shield = 0
     
     take_dmg = function(_dmg, _crit = false) {
-        if(time_with_shield == clamp(time_with_shield, 1, 7)){
+        if(time_with_shield == clamp(time_with_shield, 1, 6)){
             audio_play_sound(snd_parry, 1, 0, 1.3)
             reduction = 0
             battle.draw_black_overlay = 8
             if(hp < max_hp) heal(round(max_hp * 0.15))
         } else {
-            audio_play_sound((_crit) ? snd_crit : snd_hurt, 1, 0)
+            var _snd
+            if(time_with_shield > 0)_snd = snd_block
+            else if (_crit) _snd = snd_crit
+            else _snd = snd_hurt
+            
+            audio_play_sound(_snd, 1, 0)
+            
             sprite.color = c_red
 			if(hurt_sprite != noone and _dmg * reduction <= hp - max_hp){
 				sprite.change(hurt_sprite)
@@ -133,7 +136,7 @@ function BattleEntity(_name, _sprite) constructor{
         hp -= _final_dmg
         create_indicator(x + offset.x, y + offset.y - 12, -_final_dmg)
         
-        if(hp < 0){
+        if(hp <= 0){
             dead = true
             die()
         }
@@ -251,6 +254,9 @@ function BattleUnit(_name, _sprite) : BattleEntity("", noone) constructor {
     fire_sprite = new Sprite(spr_fire)
     fire_sprite.alpha = .8
     
+    shield_sprite = new Sprite(spr_shield)
+    draw_shield = false
+    
     turns_to_revive = 0
      
     root.anim.add(
@@ -343,18 +349,31 @@ function BattleUnit(_name, _sprite) : BattleEntity("", noone) constructor {
                 } 
                 
                 if (keyboard_check(ord("X"))){
+                    if(time_with_shield == 0){
+                        audio_play_sound(snd_pick_shield, 1, 0)
+                    }
+                    
+                    draw_shield = true
                     reduction = 0.6
                     time_with_shield++
                 } else {
+                    draw_shield = false
                     reduction = 1
                     time_with_shield = 0
                 }
+            } else{
+                draw_shield = false
             }
         } else {
             if(battle.state == BattleStates.PLAYER_ACT and battle.units[battle.current_unit] == self){
                 finished_action = true
                 turns_to_revive = approach(turns_to_revive, 0, 1)
-                if(turns_to_revive == 0){
+                
+                if(turns_to_revive > 0) {
+                    audio_play_sound(snd_tick, 1, 0, .6)
+                    create_indicator(x, y - 10, turns_to_revive, true)
+                } else if(turns_to_revive == 0){
+                    create_indicator(x, y, "REVIVER", true)
                     heal(max_hp * 0.5)
                     sprite.change(default_sprite)
                     dead = false
@@ -374,6 +393,9 @@ function BattleUnit(_name, _sprite) : BattleEntity("", noone) constructor {
             fire_sprite.draw(draw_x + offset.x, draw_y + offset.y)
         }
         sprite.draw(draw_x + offset.x, draw_y + offset.y)
+        if(draw_shield){
+            shield_sprite.draw(draw_x + offset.x + 6, draw_y + offset.y + wave(1, 3, 1))
+        }
     }
 }
 
@@ -400,7 +422,6 @@ function BattleEnemy(_name, _sprite) : BattleEntity("", noone) constructor {
         with(battle) {
             for(var i = 0; i < array_length(enemies); i++){
                 if(enemies[i] == other){
-                    turn_particles_on(other.x, other.y, 30)
 					array_delete(enemies, i, 1)
 					redefine_targets()
 				}
@@ -409,47 +430,7 @@ function BattleEnemy(_name, _sprite) : BattleEntity("", noone) constructor {
     }
     
     attack_state = function() {
-        if(action_state == -1) action_state = BattleActionStates.ATTACK_WALKING
-        if(target == -1) find_alive_target()
         
-        var _targetx, _targety, _dir, _dist
-        
-        switch (action_state) {
-            case BattleActionStates.ATTACK_WALKING:
-                var _arrived = go_to_point(target.x + 24, target.y, 3)
-                if(_arrived) {
-                    action_state = BattleActionStates.ATTACK_CHARGING
-                }
-                break
-            
-            case BattleActionStates.ATTACK_CHARGING:
-                if(!attacked){
-                    attacked = true
-                    target.dodging = true
-                    call_later(attack_anim_seconds, time_source_units_seconds, 
-                    function(){
-                        if(!target.jumping){
-                            var _damage = self.attack_damage * 4 // diminuindo dano se o parry der certo
-                            self.target.take_dmg(_damage)
-                        }
-                        self.target.dodging = false
-                        self.target.jumping = false
-                        self.action_state = BattleActionStates.ATTACK_LEAVING
-                    })
-                }
-                break
-            
-            case BattleActionStates.ATTACK_LEAVING:
-                var _arrived = go_to_point(x, y, 2)
-                if(_arrived){
-                    target = -1
-                    action_state = -1
-                    
-                    attacked = false
-                    finished_action = true
-                }
-                break
-        }
     }
     
     update = function() {
@@ -485,14 +466,15 @@ function Guerreiro(_vida, _atk, _mag) : BattleUnit("Gui", noone) constructor {
     sprite = new Sprite(spr_guerreiro_idle)
     
     available_actions = [
-        BattleActions.ATTACK,
-        BattleActions.CHARGE
+        BattleActions.ATTACK
     ]
     
 	default_sprite = spr_guerreiro_idle
 	hurt_sprite = spr_guerreiro_hit
     dead_sprite = spr_guerreiro_morte
     happy_sprite = spr_guerreiro_win
+    
+    manual_hit = false
 	
     attack_action = function() {
         if(action_state == -1) action_state = BattleActionStates.ATTACK_WALKING
@@ -543,6 +525,8 @@ function Guerreiro(_vida, _atk, _mag) : BattleUnit("Gui", noone) constructor {
                     
                     if(keyboard_check_pressed(ord("Z")) or _charge_left <= 0){
                         
+                        if(keyboard_check_pressed(ord("Z"))) manual_hit = true
+                            
                         if(_charge_left > 0){
                             if(_charge_left < charge_excellent){
                                 damage_to_deal = attack_damage * 3 * 1.5
@@ -564,7 +548,7 @@ function Guerreiro(_vida, _atk, _mag) : BattleUnit("Gui", noone) constructor {
                         
                         call_later(1, time_source_units_frames, 
                         function(){
-                            var _was_excellent = self.charge_max - self.charge < self.charge_excellent
+                            var _was_excellent = (self.charge_max - self.charge < self.charge_excellent and manual_hit)
                             
                             if(concentrating) damage_to_deal *= 2.5
                             
@@ -594,6 +578,7 @@ function Guerreiro(_vida, _atk, _mag) : BattleUnit("Gui", noone) constructor {
                     action = -1
                     target = -1
                     action_state = -1
+                    manual_hit = false
                     
                     attacked = false
                     charge = 0
@@ -659,7 +644,6 @@ function Mago(_vida, _atk, _mag) : BattleUnit("Meg", noone) constructor {
     
     available_actions = [
         BattleActions.MAGIC,
-        BattleActions.HEAL,
         BattleActions.MEDITATE
     ]
 	
@@ -859,6 +843,9 @@ function Dino() : BattleEnemy("Dino", noone) constructor {
 	
     my_delay = .25 * irandom(1_000)
     
+    default_sprite = spr_dino_move
+    hurt_sprite = spr_dino_hit
+    
 	attack_state = function() {
         if(action_state == -1) action_state = BattleActionStates.ATTACK_WALKING
         if(target == -1) find_alive_target()
@@ -868,9 +855,7 @@ function Dino() : BattleEnemy("Dino", noone) constructor {
         switch (action_state) {
             case BattleActionStates.ATTACK_WALKING:
                 var _arrived = go_to_point(target.x + 32, target.y, 1)
-                
-                self.sprite.image_spd = 2
-                
+            
                 if(_arrived) {
                     sprite.image_spd = 0
                     sprite.change(spr_dino_attack)
@@ -916,7 +901,6 @@ function Dino() : BattleEnemy("Dino", noone) constructor {
             case BattleActionStates.ATTACK_CHARGING:
                 if(!attacked){
                     attacked = true
-                    target.dodging = true
                     call_later(attack_anim_seconds - .2, time_source_units_seconds, 
                     function(){
                         self.sprite.image_spd = 2
@@ -1066,8 +1050,8 @@ function Peixe() : BattleEnemy("Peixe 'Voador'", noone) constructor {
 
 function Cavaleiro() : BattleEnemy("O Cavaleiro", noone) constructor {
     
-    hp = 40
-    max_hp = 400
+    hp = 350
+    max_hp = 350
     
     sprite = new Sprite(spr_arm_peito_idle)
     sprite.offset.y = -1
@@ -1082,8 +1066,231 @@ function Cavaleiro() : BattleEnemy("O Cavaleiro", noone) constructor {
     
     action = -1
     
+    ghost_time = 15
+    ghost_timer = ghost_time
+    draw_ghost = false
+    
+    attack_damage = 20
+    magic_damage = 20
+    
+    started_charging = false
+    concentrating = false
+    
+    fire_sprite = new Sprite(spr_fire)
+    fire_sprite.alpha = .8
+    
+    started_jump = false
+    
+    root.anim.add(
+        new Animation(self.fire_sprite, "xscale", 2, 3, 3)
+            .ease(ease_in_out_quad)
+            .type(AnimationTypes.PATROL),
+        
+        new Animation(self.fire_sprite, "yscale", 4, 1.5, 4.2)
+            .ease(ease_in_out_quad)
+            .type(AnimationTypes.PATROL)
+    )
+    
     die = function() {
         dead = true
+    }
+    
+    jump_state = function() {
+        if(action_state == -1) action_state = BattleBossActionStates.JUMP_PREP
+        if(target == -1) find_alive_target()
+        
+        var _targetx, _targety
+        
+        switch (action_state) {
+            case BattleBossActionStates.JUMP_PREP:
+                if(!started_jump){
+                    
+                    // tirando concentracao
+                    concentrating = false
+                    draw_ghost = false
+                    
+                    audio_play_sound(snd_pick_shield, 1, 0)
+                    pernas.sprite.change(spr_arm_bota_prep)
+                    pernas.offset.y -= 4
+                    offset.y += 4
+                    
+                    started_jump = true
+                    
+                    call_later(2, time_source_units_seconds,
+                    function(){
+                        // restaurando offset
+                        pernas.offset.y -= 4
+                        offset.y += 4
+                        
+                        // pulano
+                        pernas.sprite.change(spr_arm_bota_pulo)
+                        pernas.sprite.offset.y += 20 // restaurar
+                        
+                        audio_play_sound(snd_cavaleiro_jump, 1, 0)
+                        action_state = BattleBossActionStates.JUMP_JUMP
+                    })
+                }
+                break
+            
+            case BattleBossActionStates.JUMP_JUMP:
+                target.dodging = true
+                var _arrived = go_to_point(draw_x, y - 750, 6)
+                if(_arrived) {
+                    audio_play_sound(snd_cavaleiro_land, 1, 0)
+                    
+                    action_state = BattleBossActionStates.JUMP_LAND
+                }
+                break
+            
+            case BattleBossActionStates.JUMP_LAND:
+                var _arrived = go_to_point(target.x + 32, target.y - 20, 6)
+                if(_arrived and !attacked){
+                    audio_play_sound(snd_explosion, 1, 0)
+                    battle.draw_black_overlay = 20
+                    obj_camera.turn_shake_on(60, 4)
+                    
+                    pernas.sprite.change(spr_arm_bota_ataque)
+                    pernas.sprite.offset.y -= 16
+                    
+                    // dando dano
+                    target.take_dmg(attack_damage * 6)
+                    target.dodging = false
+                    target.jumping = false
+                    
+                    call_later(2, time_source_units_seconds,
+                    function(){
+                        // redefinindo sprite
+                        self.pernas.sprite.change(spr_arm_bota_idle)
+                        self.pernas.sprite.offset.y = 50
+                        self.action_state = BattleBossActionStates.JUMP_LEAVE
+                    })
+                    
+                    attacked = true
+                }
+                break
+            
+            case BattleBossActionStates.JUMP_LEAVE:
+                var _arrived = go_to_point(x, y, 6)
+                if(_arrived){
+                    
+                    action = -1
+                    target = -1
+                    action_state = -1
+                    
+                    attacked = false
+                    started_jump = false
+                    finished_action = true
+                }
+                break
+        }
+    }
+    
+    beam_state = function() {
+        if(action_state == -1) action_state = BattleBossActionStates.BEAM_PREP
+        if(target == -1) find_alive_target()
+        
+        var _targetx, _targety, _dir, _dist
+        
+        switch (action_state) {
+            case BattleBossActionStates.BEAM_PREP:
+                var _arrived = go_to_point(110, 70, .25)
+                if(_arrived) {
+                    action_state = BattleBossActionStates.BEAM_ATTACK
+                    
+                    sprite.image_spd = 3
+                    sprite.change(spr_arm_peito_ataque)
+                    
+                    pernas.sprite.change(spr_arm_bota_ataque)
+                    pernas.offset.y -= 6
+                    offset.y += 6
+                    
+                    audio_play_sound(snd_pick_shield, 1, 0)
+                }
+                break
+            
+            case BattleBossActionStates.BEAM_ATTACK:
+                if(!attacked){
+                    attacked = true
+                    target.dodging = true
+                    
+                    create_beam(draw_x, draw_y - 8, point_direction(draw_x, draw_y, target.x, target.y), 13, 4)
+                    
+                    call_later(1, time_source_units_seconds, 
+                    function(){
+                        if(!target.jumping){
+                            var _damage = self.magic_damage * 4
+                            self.target.take_dmg(_damage)
+                        }
+                        self.battle.draw_black_overlay = 8
+                        obj_camera.turn_shake_on(30, 3)
+                        audio_play_sound(snd_explosion, 1, 0)
+                        self.target.dodging = false
+                        self.target.jumping = false
+                        
+                        call_later(1, time_source_units_seconds,
+                        function(){self.action_state = BattleBossActionStates.BEAM_LEAVING})
+                    })
+                }
+                break
+            
+            case BattleBossActionStates.BEAM_LEAVING:
+                var _arrived = go_to_point(x, y, .25)
+                if(_arrived){
+                    
+                    // redefinindo sprite
+                    sprite.image_spd = 1
+                    sprite.change(spr_arm_peito_idle)
+                    
+                    pernas.sprite.change(spr_arm_bota_idle)
+                    pernas.offset.y += 6
+                    offset.y -= 6
+                    
+                    action = -1
+                    target = -1
+                    action_state = -1
+                    
+                    attacked = false
+                    finished_action = true
+                }
+                break
+        }
+    }
+    
+    charge_state = function() {
+        if(action_state == -1){
+            action_state = BattleBossActionStates.CHARGE_ANIM
+        }
+        
+        switch(action_state) {
+            case BattleBossActionStates.CHARGE_ANIM:
+                if(!started_charging){
+                    audio_play_sound(snd_pick_shield, 1, 0)
+                    
+                    pernas.sprite.change(spr_arm_bota_prep)
+                    pernas.offset.y -= 4
+                    offset.y += 4
+                    
+                    call_later(1, time_source_units_seconds,
+                    function(){
+                        self.battle.draw_black_overlay = 8
+                        self.pernas.sprite.change(spr_arm_bota_idle)
+                        audio_play_sound(snd_charge, 1, 0, 1, undefined, .6)
+                        
+                        self.pernas.offset.y += 4
+                        self.offset.y -= 4
+                        
+                        self.action = -1
+                        self.target = -1
+                        self.action_state = -1
+                        
+                        self.concentrating = true
+                        self.started_charging = false
+                        self.finished_action = true
+                    }) 
+                    started_charging = true
+                }
+                break;
+        }
     }
     
     main_update = function() {
@@ -1098,32 +1305,38 @@ function Cavaleiro() : BattleEnemy("O Cavaleiro", noone) constructor {
             _b = approach(_b, 255, 3)
             
             sprite.color = make_color_rgb(_r, _g, _b)
+        } else {
+            sprite.color = #346856
         }
+        
+        if(draw_ghost) ghost_timer--
     }
     
     update = function() {
-        finished_action = true
         
         for(var i = 0; i < array_length(battle.enemies); i++){
             var _cur_enemy = battle.enemies[i]
-            if(is_instanceof(_cur_enemy, CavaleiroCabeca)){
+            if(cabeca == -1 and is_instanceof(_cur_enemy, CavaleiroCabeca)){
                 cabeca = _cur_enemy
                 continue
             }
             
-            if(is_instanceof(_cur_enemy, CavaleiroPernas)){
+            if(pernas == -1 and is_instanceof(_cur_enemy, CavaleiroPernas)){
                 pernas = _cur_enemy
+                pernas.sprite.offset.y = 50
                 continue
             }
         }
         
-        if(cabeca != -1 and pernas != -1){
+        if(cabeca != -1) {
             cabeca.x = x
             cabeca.y = y - 32
             
             cabeca.draw_x = cabeca.x
             cabeca.draw_y = cabeca.y
-            
+        }
+        
+        if(pernas != 1) {
             pernas.x = x
             pernas.y = y + 32
             
@@ -1131,18 +1344,58 @@ function Cavaleiro() : BattleEnemy("O Cavaleiro", noone) constructor {
             pernas.draw_y = pernas.y
         }
         
+        if(pernas.dead) {
+            concentrating = false
+            draw_ghost = false
+        }
+        
+        if(hp > max_hp) hp = max_hp
+        
+        if(dead){
+            return
+        }
+        
+        if(battle.state == BattleStates.ENEMY_ATTACKING and battle.enemies[battle.current_enemy] == self){
+            
+            if(action == -1){
+                if(!concentrating){
+                    if(!pernas.dead){
+                        action = choose(BattleBossActions.BEAM, BattleBossActions.CHARGE)
+                    } else {
+                        action = choose(BattleBossActions.BEAM)
+                    }
+                } else { 
+                    action = BattleBossActions.JUMP_ATTACK
+                }
+            }
+            
+            switch(action){
+                case BattleBossActions.BEAM: beam_state(); break;
+                case BattleBossActions.CHARGE: charge_state(); break;
+                case BattleBossActions.JUMP_ATTACK: jump_state(); break;
+            }
+        }
+        
+        if(concentrating){
+            offset.x = wave(-2, 2, .4)
+            fire_sprite.animate(1)
+        }
     }
     
     main_draw = function() {
+        if(concentrating){
+            fire_sprite.draw(draw_x + offset.x, draw_y + offset.y + 50)
+        }
         
         // pernocas
-        pernas.sprite.offset.y = 50
+        var _pxoff = (battle.state != BattleStates.STARTING) ? pernas.offset.x : 0
+        var _pyoff = (battle.state != BattleStates.STARTING) ? pernas.offset.y : 0
         
         pernas.sprite.xscale = -1
-        pernas.sprite.draw(draw_x + offset.x - 12 - wave(0, 2, 5), draw_y + offset.y)
+        pernas.sprite.draw(draw_x + offset.x + _pxoff - 12 - wave(0, 2, 5), draw_y + offset.y + _pyoff)
         
         pernas.sprite.xscale = 1
-        pernas.sprite.draw(draw_x + offset.x + 12 + wave(0, 2, 5), draw_y + offset.y)
+        pernas.sprite.draw(draw_x + offset.x + _pxoff + 12 + wave(0, 2, 5), draw_y + offset.y + _pyoff)
         pernas.sprite.animate(2)
         
         // corpo
@@ -1152,18 +1405,59 @@ function Cavaleiro() : BattleEnemy("O Cavaleiro", noone) constructor {
         sprite.animate(2)
         
         // cabeça
+        var _cxoff = (battle.state != BattleStates.STARTING) ? cabeca.offset.x : 0
+        var _cyoff = (battle.state != BattleStates.STARTING) ? cabeca.offset.y : 0
+        
         cabeca.sprite.rotation = wave(-2, 6, 7)
         cabeca.sprite.offset.y = wave(0, 2, 4)
         
-        cabeca.sprite.draw(draw_x + offset.x, draw_y + offset.y)
+        cabeca.sprite.draw(draw_x + offset.x + _cxoff, draw_y + offset.y + _cyoff)
         cabeca.sprite.animate(1)
+        
+        // criando sprites
+        /*
+        if(ghost_timer <= 0){
+            ghost_timer = ghost_time
+            
+            // cabeca
+            var _cab = instance_create_depth(draw_x + offset.x, draw_y + offset.y + cabeca.sprite.offset.y, battle.depth - 100, obj_vanishing_sprite)
+            _cab.sprite_index = cabeca.sprite.sprite
+            _cab.image_index = cabeca.sprite.image_ind
+            _cab.image_angle = cabeca.sprite.rotation
+            
+            // corpo
+            var _corpo = instance_create_depth(draw_x + offset.x, draw_y + offset.y + sprite.offset.y, battle.depth - 100, obj_vanishing_sprite)
+            _corpo.sprite_index = sprite.sprite
+            _corpo.image_index = sprite.image_ind
+            _corpo.image_angle = sprite.rotation
+            _corpo.image_xscale = 1.5
+            _corpo.image_yscale = 1.5
+            
+            // pernas
+            var _p1 = instance_create_depth(draw_x + offset.x - 12 - wave(0, 2, 5), draw_y + offset.y + pernas.sprite.offset.y, battle.depth - 100, obj_vanishing_sprite)
+            _p1.sprite_index = pernas.sprite.sprite
+            _p1.image_index = pernas.sprite.image_ind
+            _p1.image_xscale = -1
+            
+            
+            var _p2 = instance_create_depth(draw_x + offset.x - 12 + wave(0, 2, 5), draw_y + offset.y + pernas.sprite.offset.y, battle.depth - 100, obj_vanishing_sprite)
+            _p2.sprite_index = pernas.sprite.sprite
+            _p2.image_index = pernas.sprite.image_ind
+        }
+        */
+        
+        // sombra do pulo
+        if(action == BattleBossActions.JUMP_ATTACK and action_state == BattleBossActionStates.JUMP_LAND and !attacked){
+            var _distance_mult = 1 + ((target.y - draw_y) / 300)
+            draw_sprite_ext(spr_shadow, 0, target.x + 16, target.y, .8 * _distance_mult, _distance_mult, 0, c_white, .7)
+        }
     }
     
 }
 
 function CavaleiroCabeca() : BattleEnemy("O Cavaleiro", noone) constructor {
-    hp = 30
-    max_hp = 300
+    hp = 250
+    max_hp = 250
     
     sprite = new Sprite(spr_arm_cabe_a_idle)
     
@@ -1187,6 +1481,8 @@ function CavaleiroCabeca() : BattleEnemy("O Cavaleiro", noone) constructor {
             _b = approach(_b, 255, 3)
             
             sprite.color = make_color_rgb(_r, _g, _b)
+        } else {
+            sprite.color = #346856
         }
     }
     
@@ -1204,7 +1500,7 @@ function CavaleiroCabeca() : BattleEnemy("O Cavaleiro", noone) constructor {
 }
 
 function CavaleiroPernas() : BattleEnemy("O Cavaleiro", noone) constructor {
-    hp = 20
+    hp = 200
     max_hp = 200
     
     sprite = new Sprite(spr_arm_bota_idle)
@@ -1229,6 +1525,8 @@ function CavaleiroPernas() : BattleEnemy("O Cavaleiro", noone) constructor {
             _b = approach(_b, 255, 3)
             
             sprite.color = make_color_rgb(_r, _g, _b)
+        } else {
+            sprite.color = #346856
         }
     }
     
@@ -1309,7 +1607,7 @@ function UnitCard(_unit_link) constructor {
         draw_sprite(spr_heart, 0, x + offset.x + 2, y + offset.y + 8)
         
         // vida
-		var _life_text = scribble($"{round(_final_hp)}{_complementary_hp_string}")
+		var _life_text = scribble($"{ceil(_final_hp)}{_complementary_hp_string}", $"hp_text{_final_hp}")
 			.starting_format("fnt_default", _hp_text_color)
             .scale(.25)
             .padding(2, 2, 2, 2)
@@ -1325,7 +1623,7 @@ function UnitCard(_unit_link) constructor {
         }
         
         // mana
-		var _mana_text = scribble($"{_complementary_mana_string}{round(_final_mana)}")
+		var _mana_text = scribble($"{_complementary_mana_string}{ceil(_final_mana)}", $"mana_text{_final_mana}")
 			.starting_format("fnt_default", _mana_text_color)
             .scale(.25)
             .align(2, 0)
@@ -1336,7 +1634,7 @@ function UnitCard(_unit_link) constructor {
 	}
 }
 
-function start_battle(_units, _enemies, _start_frames = 0, _song = msc_battle) {
+function start_battle(_units, _enemies, _start_frames = 0, _song = msc_battle, _on_end = function(){audio_play_sound(msc_dungeon, 1, 1)}) {
 	// tirando controle do player e manipulando câmera
 	obj_player.control = false
 	obj_camera.control_mode = "battle"
@@ -1364,6 +1662,7 @@ function start_battle(_units, _enemies, _start_frames = 0, _song = msc_battle) {
 	_inst.cards = _cards
 	_inst.music = _song
 	_inst.delay_start = _start_frames
+    _inst.on_end = _on_end
 }
 
 function end_battle() {
@@ -1371,10 +1670,8 @@ function end_battle() {
 	obj_camera.control_mode = "dungeon"
 	obj_camera.spawning = true
 	obj_player.control = true
+    obj_follow.following = true
     
     root.guerreiro.draw_x = -1000
     root.mago.draw_x = -1000
-    
-    audio_stop_all()
-    audio_play_sound(msc_dungeon, 1, 1)
 }

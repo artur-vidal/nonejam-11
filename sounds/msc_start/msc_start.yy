@@ -12,8 +12,8 @@
   "duration":276.4568,
   "name":"msc_start",
   "parent":{
-    "name":"Scribble",
-    "path":"folders/Scribble.yy",
+    "name":"Musicas",
+    "path":"folders/Sounds/Musicas.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

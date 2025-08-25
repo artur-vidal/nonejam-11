@@ -27,7 +27,7 @@
   "origin":7,
   "parent":{
     "name":"Pexe",
-    "path":"folders/Sprites/Pexe.yy",
+    "path":"folders/Sprites/Inimigos/Pexe.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

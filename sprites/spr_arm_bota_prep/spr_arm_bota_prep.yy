@@ -27,7 +27,7 @@
   "origin":7,
   "parent":{
     "name":"Cavaleiro",
-    "path":"folders/Sprites/Cavaleiro.yy",
+    "path":"folders/Sprites/Inimigos/Cavaleiro.yy",
   },
   "preMultiplyAlpha":false,
   "resourceType":"GMSprite",

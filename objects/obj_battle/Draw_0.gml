@@ -113,6 +113,34 @@ for(var i = 0; i < array_length(cards); i++){
     if(state != BattleStates.STARTING and state != BattleStates.END) cards[i].draw(_hpdiff, _mndiff, _c_hp_string, _c_mana_string)
 }
 
+
+// desenhando tela de continue
+if(state == BattleStates.GAME_OVER){
+    
+    draw_set_color(#081820)
+    draw_set_alpha(continue_alpha)
+    draw_rectangle(0, 0, room_width, room_height, false)
+    draw_set_alpha(1)
+    draw_set_color(c_white)
+    
+    var _xshake = (continue_text_timer > 0) ? irandom_range(-1, 1) : 0
+    var _yshake = (continue_text_timer > 0) ? irandom_range(-1, 1) : 0
+    
+    var _cont_text = scribble("Continuar?\n[scale, 0.5]Aperte Z")
+        .starting_format("fnt_default", #e0f8d0)
+        .blend(c_white, continue_alpha)
+        .align(1, 1)
+        .scale(.8)
+    _cont_text.draw(80, 40)
+    
+    var _num_text = scribble(floor(continue_seconds / 60))
+        .starting_format("fnt_default", #e0f8d0)
+        .blend(c_white, continue_alpha)
+        .align(1, 1)
+        .scale(.5)
+    _num_text.draw(80 + _xshake, 60 + _yshake)
+}
+
 if(draw_black_overlay > 0 and surface_exists(black_overlay)){
 	gpu_set_blendmode(bm_normal)
 	draw_set_color(c_white)

@@ -19,7 +19,7 @@
   "resourceType":"GMSound",
   "resourceVersion":"2.0",
   "sampleRate":44100,
-  "soundFile":"snd_explosion.mp3",
+  "soundFile":"snd_explosion.wav",
   "type":0,
   "volume":1.0,
 }

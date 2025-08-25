@@ -5,8 +5,8 @@
   "isDnD":false,
   "name":"scribble",
   "parent":{
-    "name":"Sounds",
-    "path":"folders/Sounds.yy",
+    "name":"Scribble",
+    "path":"folders/Scribble.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

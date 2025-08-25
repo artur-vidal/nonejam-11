@@ -12,8 +12,8 @@
   "duration":6.4000454,
   "name":"msc_victory",
   "parent":{
-    "name":"Sounds",
-    "path":"folders/Sounds.yy",
+    "name":"Musicas",
+    "path":"folders/Sounds/Musicas.yy",
   },
   "preload":false,
   "resourceType":"GMSound",

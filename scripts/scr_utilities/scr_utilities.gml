@@ -109,17 +109,20 @@ function create_indicator(_x, _y, _val, _mini = false){
 }
 
 
-function create_dialogue(_text_array, _sound = snd_text_mid, _pitch_min = 1, _pitch_max = 1, _font = fnt_default){
+function create_dialogue(_text_array, _dir = 1, _on_end = function(){}, _sound = snd_text_mid, _pitch_min = 1, _pitch_max = 1, _font = fnt_default){
 	if(root.dialogue_create_cooldown > 0 or instance_exists(obj_ow_dialogue)){
 		return
 	}
 	
     var _box = instance_create_depth(0, 0, -100, obj_ow_dialogue)
     _box.text = _text_array
+    _box.on_dialogue_end = _on_end
     _box.font = _font
     _box.sound = _sound
     _box.pitch_min = _pitch_min
     _box.pitch_max = _pitch_max
+    
+    _box.start(_dir)
 }
 
 function create_transition(_dur, _on_switch = function(){}, _on_end = function(){}) {
